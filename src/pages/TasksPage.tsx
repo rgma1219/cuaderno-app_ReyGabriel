@@ -1,13 +1,24 @@
 import { useState } from "react";
 import { BrandLogo } from "../components/BrandLogo";
 import { TodoForm } from "../components/TodoForm";
+import { TodoList } from "../components/TodoList";
 import { useAuth } from "../hooks/useAuth";
 import { useTasks } from "../hooks/useTasks";
 import { formatCurrentDate } from "../utils/date.utils";
 
 export function TasksPage() {
   const { user, logout } = useAuth();
-  const { addTask } = useTasks();
+  const {
+    tasks,
+    loading,
+    error,
+    addTask,
+    editTask,
+    toggleCompleted,
+    removeTask,
+    pendingCount,
+    completedCount,
+  } = useTasks();
   const [isFormOpenMobile, setIsFormOpenMobile] = useState(false);
 
   const handleLogout = async () => {
@@ -98,39 +109,14 @@ export function TasksPage() {
             </div>
           </div>
 
-          <div className="tasks-list-preview">
-            <article className="task-card-preview glass-card">
-              <div className="task-info">
-                <span className="task-title">Revisar propuesta comercial</span>
-                <span className="task-desc">
-                  Analizar métricas del sprint y enviar informe a gerencia.
-                </span>
-              </div>
-              <span className="glass-badge badge-pending">Pendiente</span>
-            </article>
-
-            <article className="task-card-preview glass-card">
-              <div className="task-info">
-                <span className="task-title">Autenticación completada</span>
-                <span className="task-desc">
-                  Sesión activa protegida con Firebase Auth.
-                </span>
-              </div>
-              <span className="glass-badge badge-pending">Pendiente</span>
-            </article>
-
-            <article className="task-card-preview glass-card task-card-completed">
-              <div className="task-info">
-                <span className="task-title task-title-completed">
-                  Definición de identidad visual
-                </span>
-                <span className="task-desc">
-                  Paletas y diseño de Glassmorphism acordados.
-                </span>
-              </div>
-              <span className="glass-badge badge-completed">Completada</span>
-            </article>
-          </div>
+          <TodoList
+            tasks={tasks}
+            loading={loading}
+            error={error}
+            onToggleCompleted={toggleCompleted}
+            onEditTask={editTask}
+            onDeleteTask={removeTask}
+          />
         </section>
       </main>
     </div>

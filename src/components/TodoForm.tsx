@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type SyntheticEvent } from 'react';
 import type { TaskCreateInput } from '../types/task.types';
 
 export interface TodoFormProps {
@@ -17,7 +17,7 @@ export function TodoForm({ onAddTask, onSuccess }: TodoFormProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Caso borde: Validación de título vacío o con solo espacios

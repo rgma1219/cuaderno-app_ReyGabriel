@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type SyntheticEvent } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { BrandLogo } from '../components/BrandLogo';
@@ -17,7 +17,7 @@ export function LoginPage() {
     return <Navigate to="/tasks" replace />;
   }
 
-  const handleEmailLogin = async (e: FormEvent<HTMLFormElement>) => {
+  const handleEmailLogin = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMessage(null);
     setIsSubmitting(true);

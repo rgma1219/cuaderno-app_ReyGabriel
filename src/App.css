@@ -393,43 +393,293 @@
   font-size: 0.9rem;
 }
 
-.tasks-list-preview {
+/* ==========================================================================
+   Listado de Tareas y Filtros (TodoList & TodoItem)
+   ========================================================================== */
+.tasks-list-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1.25rem;
 }
 
-.task-card-preview {
+.tasks-filter-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.filter-tab-btn {
+  background: var(--glass-bg-subtle);
+  border: 1px solid var(--glass-border-subtle);
+  color: var(--text-secondary);
+  font-family: var(--font-family);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.filter-tab-btn:hover {
+  background: var(--glass-bg);
+  color: var(--text-primary);
+  border-color: var(--glass-border);
+}
+
+.filter-tab-btn.is-active {
+  background: var(--accent-primary);
+  color: #ffffff;
+  border-color: var(--accent-primary);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+
+.tasks-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* Tarjeta de Tarea Individual (TodoItem) */
+.task-card {
   padding: 1rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .task-card-completed {
-  opacity: 0.75;
+  opacity: 0.72;
+}
+
+.task-card-editing {
+  display: block;
+  border-color: var(--accent-primary);
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.12);
+}
+
+.task-main-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  flex: 1 1 240px;
+}
+
+.task-checkbox-btn {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--text-muted);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-top: 0.15rem;
+  transition: all var(--transition-fast);
+}
+
+.task-checkbox-btn:hover {
+  border-color: var(--accent-primary);
+  transform: scale(1.08);
+}
+
+.task-checkbox-btn.is-checked {
+  background: var(--accent-success);
+  border-color: var(--accent-success);
+}
+
+.checkmark-icon {
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .task-info {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  flex: 1;
 }
 
 .task-title {
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   font-weight: 600;
   color: var(--text-primary);
+  line-height: 1.35;
+  transition: color var(--transition-fast);
 }
 
 .task-title-completed {
   text-decoration: line-through;
+  color: var(--text-muted);
 }
 
 .task-desc {
   font-size: 0.85rem;
   color: var(--text-secondary);
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.task-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.task-buttons-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.task-action-btn {
+  background: var(--glass-bg-subtle);
+  border: 1px solid var(--glass-border-subtle);
+  padding: 0.35rem 0.55rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.task-action-btn:hover {
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+  transform: translateY(-1px);
+}
+
+.task-action-btn-danger:hover {
+  background: var(--accent-danger-bg);
+  border-color: var(--accent-danger);
+}
+
+.task-delete-confirm-box {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--glass-bg);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent-danger);
+}
+
+.confirm-delete-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-danger);
+}
+
+.task-btn-danger-confirm {
+  background: var(--accent-danger);
+  color: #ffffff;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.task-btn-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+/* Formulario de Edición en Línea */
+.task-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.task-edit-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.25rem;
+}
+
+/* Estado Vacío (Empty State) */
+.tasks-empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.empty-state-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.empty-state-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.empty-state-subtitle {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  max-width: 420px;
+  line-height: 1.5;
+}
+
+/* Skeleton Loader Shimmer */
+.task-skeleton-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1.25rem;
+  animation: pulse-shimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-checkbox {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--glass-border-subtle);
+}
+
+.skeleton-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.skeleton-line {
+  height: 12px;
+  border-radius: var(--radius-sm);
+  background: var(--glass-border-subtle);
+}
+
+.skeleton-line-title {
+  width: 55%;
+}
+
+.skeleton-line-desc {
+  width: 35%;
+  height: 10px;
+}
+
+@keyframes pulse-shimmer {
+  0% { opacity: 0.5; }
+  50% { opacity: 0.9; }
+  100% { opacity: 0.5; }
 }
 
 /* Utilidades generales */
