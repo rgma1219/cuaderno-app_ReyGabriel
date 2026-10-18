@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { BrandLogo } from "../components/BrandLogo";
+import { TodoForm } from "../components/TodoForm";
 import { useAuth } from "../hooks/useAuth";
+import { useTasks } from "../hooks/useTasks";
 import { formatCurrentDate } from "../utils/date.utils";
 
 export function TasksPage() {
   const { user, logout } = useAuth();
+  const { addTask } = useTasks();
   const [isFormOpenMobile, setIsFormOpenMobile] = useState(false);
 
   const handleLogout = async () => {
@@ -59,42 +62,10 @@ export function TasksPage() {
           </div>
 
           <div className={`sidebar-collapsible ${isFormOpenMobile ? "is-open" : ""}`}>
-            <form onSubmit={(e) => e.preventDefault()} className="task-form">
-              <div className="form-group">
-                <label htmlFor="task-title-input" className="form-label">
-                  Título
-                </label>
-                <input
-                  id="task-title-input"
-                  type="text"
-                  className="glass-input"
-                  placeholder="Ej. Revisar propuesta comercial"
-                  readOnly
-                  value="Revisar propuesta comercial"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="task-desc-input" className="form-label">
-                  Descripción
-                </label>
-                <textarea
-                  id="task-desc-input"
-                  className="glass-textarea"
-                  rows={3}
-                  placeholder="Detalles de la tarea..."
-                  readOnly
-                  value="Analizar métricas del sprint y enviar informe a gerencia."
-                />
-              </div>
-
-              <button
-                type="button"
-                className="glass-button glass-button-primary w-full"
-              >
-                + Agregar Tarea
-              </button>
-            </form>
+            <TodoForm
+              onAddTask={addTask}
+              onSuccess={() => setIsFormOpenMobile(false)}
+            />
 
             <hr className="divider" />
 
