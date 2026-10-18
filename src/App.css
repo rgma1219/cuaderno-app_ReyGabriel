@@ -1,4 +1,6 @@
-/* Contenedor principal de la aplicación */
+/* ==========================================================================
+    Contenedor Principal y Layout Base
+   ========================================================================== */
 .app-shell {
   max-width: 1100px;
   margin: 0 auto;
@@ -16,6 +18,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .header-actions {
@@ -29,7 +32,42 @@
   font-size: 0.85rem;
 }
 
-/* Componente BrandLogo */
+.user-profile-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--glass-bg-subtle);
+  border: 1px solid var(--glass-border-subtle);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-full);
+}
+
+.user-avatar-initial {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-email-text {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+    Componente BrandLogo
+   ========================================================================== */
 .brand-logo-container {
   display: inline-flex;
   align-items: center;
@@ -64,7 +102,6 @@
   line-height: 1.2;
 }
 
-/* Variantes de tamaño de BrandLogo */
 .brand-logo-sm .brand-logo-title {
   font-size: 1rem;
 }
@@ -80,13 +117,169 @@
 }
 
 .brand-logo-lg .brand-logo-title {
-  font-size: 1.75rem;
+  font-size: 1.6rem;
 }
 .brand-logo-lg .brand-logo-subtitle {
   font-size: 0.85rem;
 }
 
-/* Layout dividido (Split Layout) */
+/* ==========================================================================
+    Vistas de Autenticación (Login / Register)
+   ========================================================================== */
+.auth-page-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  padding: 2.25rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.auth-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.auth-subtitle {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.auth-separator {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.25rem 0;
+}
+
+.separator-line {
+  flex: 1;
+  height: 1px;
+  background: var(--glass-border-subtle);
+}
+
+.separator-text {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.google-icon {
+  flex-shrink: 0;
+}
+
+.auth-footer {
+  text-align: center;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--glass-border-subtle);
+}
+
+.auth-footer-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.auth-link {
+  color: var(--accent-primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+  opacity: 0.85;
+}
+
+/* Alertas de Error y Feedback */
+.glass-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.glass-alert-error {
+  background: var(--accent-danger-bg);
+  border: 1px solid var(--accent-danger);
+  color: var(--accent-danger);
+}
+
+.alert-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+/* Pantalla de Carga de Autenticación (Loading Screen) */
+.auth-loading-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.auth-loading-card {
+  padding: 2.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.spinner-indicator {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--glass-border-subtle);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.auth-loading-text {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* ==========================================================================
+    Dashboard de Tareas (Layout Dividido)
+   ========================================================================== */
 .app-split-layout {
   display: grid;
   grid-template-columns: 1fr;
@@ -100,7 +293,6 @@
   }
 }
 
-/* Panel lateral (Sidebar / Acciones y creación) */
 .sidebar-panel {
   padding: 1.5rem;
   display: flex;
@@ -141,7 +333,6 @@
   gap: 0.5rem;
 }
 
-/* Panel principal (Dashboard / Listado de tareas) */
 .content-panel {
   padding: 1.5rem;
   display: flex;
@@ -198,7 +389,7 @@
   color: var(--text-secondary);
 }
 
-/* Badges y utilidades */
+/* Utilidades generales */
 .badge-pending {
   background: var(--accent-primary);
   color: var(--accent-primary-fg);
