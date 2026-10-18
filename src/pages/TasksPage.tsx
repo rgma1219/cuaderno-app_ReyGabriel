@@ -34,6 +34,10 @@ export function TasksPage() {
 
   const todayFormatted = formatCurrentDate();
 
+  const totalCount = tasks.length;
+  const progressPercentage =
+    totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
   return (
     <div className="app-shell">
       {/* Header Glassmorphism con información de usuario autenticado */}
@@ -72,11 +76,38 @@ export function TasksPage() {
             </button>
           </div>
 
-          <div className={`sidebar-collapsible ${isFormOpenMobile ? "is-open" : ""}`}>
+          <div
+            className={`sidebar-collapsible ${isFormOpenMobile ? "is-open" : ""}`}
+          >
             <TodoForm
               onAddTask={addTask}
               onSuccess={() => setIsFormOpenMobile(false)}
             />
+
+            {/* Barra de Progreso en Vivo */}
+            {totalCount > 0 && (
+              <div className="task-progress-card">
+                <div className="progress-info-header">
+                  <span className="progress-label">Progreso</span>
+                  <span className="progress-value">{progressPercentage}%</span>
+                </div>
+                <div
+                  className="progress-track"
+                  role="progressbar"
+                  aria-valuenow={progressPercentage}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                >
+                  <div
+                    className="progress-fill"
+                    style={{ width: `${progressPercentage}%` }}
+                  />
+                </div>
+                <span className="progress-subtext">
+                  {completedCount} de {totalCount} tareas completadas
+                </span>
+              </div>
+            )}
 
             <hr className="divider" />
 
@@ -86,9 +117,20 @@ export function TasksPage() {
               <button
                 type="button"
                 className="glass-button glass-button-secondary w-full"
+                disabled={totalCount === 0}
+                title={
+                  totalCount === 0
+                    ? "Crea al menos una tarea para enviar el resumen"
+                    : "Enviar resumen por correo electrónico"
+                }
               >
                 📧 Enviar resumen por Email
               </button>
+              {totalCount === 0 && (
+                <span className="form-hint-text">
+                  Agrega al menos una tarea para habilitar el envío de resumen.
+                </span>
+              )}
             </div>
           </div>
         </aside>
@@ -99,8 +141,11 @@ export function TasksPage() {
             <div>
               <h2 className="panel-title">Hola {userDisplayName}</h2>
               <span className="brand-subtitle">
-                A continuación se encuentran tus tareas pendientes y
-                completadas.
+                {loading
+                  ? "Sincronizando tareas con Firestore..."
+                  : totalCount === 0
+                    ? "Comienza creando tu primera tarea."
+                    : `Tienes ${pendingCount} ${pendingCount === 1 ? "tarea pendiente" : "tareas pendientes"} y ${completedCount} ${completedCount === 1 ? "completada" : "completadas"}.`}
               </span>
             </div>
             <div className="current-date-badge">

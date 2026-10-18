@@ -1,14 +1,17 @@
-import { useState, useMemo } from 'react';
-import type { Task, TaskUpdateInput } from '../types/task.types';
-import { TodoItem } from './TodoItem';
+import { useState, useMemo } from "react";
+import type { Task, TaskUpdateInput } from "../types/task.types";
+import { TodoItem } from "./TodoItem";
 
-export type TaskFilter = 'all' | 'pending' | 'completed';
+export type TaskFilter = "all" | "pending" | "completed";
 
 export interface TodoListProps {
   tasks: Task[];
   loading: boolean;
   error: string | null;
-  onToggleCompleted: (taskId: string, currentCompleted: boolean) => Promise<void>;
+  onToggleCompleted: (
+    taskId: string,
+    currentCompleted: boolean,
+  ) => Promise<void>;
   onEditTask: (taskId: string, input: TaskUpdateInput) => Promise<void>;
   onDeleteTask: (taskId: string) => Promise<void>;
 }
@@ -26,12 +29,12 @@ export function TodoList({
   onEditTask,
   onDeleteTask,
 }: TodoListProps) {
-  const [activeFilter, setActiveFilter] = useState<TaskFilter>('all');
+  const [activeFilter, setActiveFilter] = useState<TaskFilter>("all");
 
   // Filtrado reactivo en memoria
   const filteredTasks = useMemo(() => {
-    if (activeFilter === 'pending') return tasks.filter((t) => !t.completed);
-    if (activeFilter === 'completed') return tasks.filter((t) => t.completed);
+    if (activeFilter === "pending") return tasks.filter((t) => !t.completed);
+    if (activeFilter === "completed") return tasks.filter((t) => t.completed);
     return tasks;
   }, [tasks, activeFilter]);
 
@@ -71,7 +74,7 @@ export function TodoList({
         <div className="empty-state-icon">📋</div>
         <h3 className="empty-state-title">No tienes tareas registradas</h3>
         <p className="empty-state-subtitle">
-          Comienza creando tu primera tarea desde el panel lateral para organizar tu día.
+          Comienza creando tu primera tarea para organizar tu día.
         </p>
       </div>
     );
@@ -83,22 +86,22 @@ export function TodoList({
       <nav className="tasks-filter-tabs" aria-label="Filtro de tareas">
         <button
           type="button"
-          className={`filter-tab-btn ${activeFilter === 'all' ? 'is-active' : ''}`}
-          onClick={() => setActiveFilter('all')}
+          className={`filter-tab-btn ${activeFilter === "all" ? "is-active" : ""}`}
+          onClick={() => setActiveFilter("all")}
         >
           Todas ({tasks.length})
         </button>
         <button
           type="button"
-          className={`filter-tab-btn ${activeFilter === 'pending' ? 'is-active' : ''}`}
-          onClick={() => setActiveFilter('pending')}
+          className={`filter-tab-btn ${activeFilter === "pending" ? "is-active" : ""}`}
+          onClick={() => setActiveFilter("pending")}
         >
           Pendientes ({tasks.filter((t) => !t.completed).length})
         </button>
         <button
           type="button"
-          className={`filter-tab-btn ${activeFilter === 'completed' ? 'is-active' : ''}`}
-          onClick={() => setActiveFilter('completed')}
+          className={`filter-tab-btn ${activeFilter === "completed" ? "is-active" : ""}`}
+          onClick={() => setActiveFilter("completed")}
         >
           Completadas ({tasks.filter((t) => t.completed).length})
         </button>
@@ -106,9 +109,13 @@ export function TodoList({
 
       {/* Lista filtrada o estado vacío por filtro */}
       {filteredTasks.length === 0 ? (
-        <div className="tasks-empty-state glass-card" style={{ padding: '2rem 1.5rem' }}>
+        <div
+          className="tasks-empty-state glass-card"
+          style={{ padding: "2rem 1.5rem" }}
+        >
           <p className="empty-state-subtitle">
-            No hay tareas en el filtro seleccionado (<strong>{activeFilter}</strong>).
+            No hay tareas en el filtro seleccionado (
+            <strong>{activeFilter}</strong>).
           </p>
         </div>
       ) : (
