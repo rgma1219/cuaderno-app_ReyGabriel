@@ -8,7 +8,7 @@ export default function App() {
       <header className="app-header glass-panel">
         <BrandLogo size="md" />
         <div className="header-actions">
-          <button className="glass-button glass-button-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
+          <button type="button" className="glass-button glass-button-secondary header-logout-btn">
             Cerrar sesión
           </button>
         </div>
@@ -22,10 +22,13 @@ export default function App() {
             <span>Crear Tarea</span>
           </div>
 
-          <form onSubmit={(e) => e.preventDefault()} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <form onSubmit={(e) => e.preventDefault()} className="task-form">
             <div className="form-group">
-              <label className="form-label">Título</label>
+              <label htmlFor="task-title-input" className="form-label">
+                Título
+              </label>
               <input
+                id="task-title-input"
                 type="text"
                 className="glass-input"
                 placeholder="Ej. Revisar propuesta comercial"
@@ -35,8 +38,11 @@ export default function App() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Descripción</label>
+              <label htmlFor="task-desc-input" className="form-label">
+                Descripción
+              </label>
               <textarea
+                id="task-desc-input"
                 className="glass-textarea"
                 rows={3}
                 placeholder="Detalles de la tarea..."
@@ -45,17 +51,17 @@ export default function App() {
               />
             </div>
 
-            <button type="button" className="glass-button glass-button-primary" style={{ width: '100%' }}>
+            <button type="button" className="glass-button glass-button-primary w-full">
               + Agregar Tarea
             </button>
           </form>
 
-          <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border-subtle)' }} />
+          <hr className="divider" />
 
           {/* Acción de AWS SES */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div className="notification-section">
             <span className="form-label">Notificaciones</span>
-            <button type="button" className="glass-button glass-button-secondary" style={{ width: '100%' }}>
+            <button type="button" className="glass-button glass-button-secondary w-full">
               📧 Enviar resumen por Email
             </button>
           </div>
@@ -76,7 +82,7 @@ export default function App() {
                 <span className="task-title">Revisar propuesta comercial</span>
                 <span className="task-desc">Analizar métricas del sprint y enviar informe a gerencia.</span>
               </div>
-              <span className="glass-badge" style={{ background: 'var(--accent-primary)', color: '#fff' }}>
+              <span className="glass-badge badge-pending">
                 Pendiente
               </span>
             </article>
@@ -86,19 +92,19 @@ export default function App() {
                 <span className="task-title">Setup de Firebase y Firestore</span>
                 <span className="task-desc">Configurar colecciones y credenciales de entorno.</span>
               </div>
-              <span className="glass-badge" style={{ background: 'var(--accent-primary)', color: '#fff' }}>
+              <span className="glass-badge badge-pending">
                 Pendiente
               </span>
             </article>
 
-            <article className="task-card-preview glass-card" style={{ opacity: 0.75 }}>
+            <article className="task-card-preview glass-card task-card-completed">
               <div className="task-info">
-                <span className="task-title" style={{ textDecoration: 'line-through' }}>
+                <span className="task-title task-title-completed">
                   Definición de identidad visual
                 </span>
                 <span className="task-desc">Paletas y diseño de Glassmorphism acordados.</span>
               </div>
-              <span className="glass-badge" style={{ background: 'var(--accent-success-bg)', color: 'var(--accent-success)' }}>
+              <span className="glass-badge badge-completed">
                 Completada
               </span>
             </article>

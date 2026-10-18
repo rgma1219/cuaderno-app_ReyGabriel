@@ -18,42 +18,72 @@
   gap: 1rem;
 }
 
-.brand-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.brand-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: var(--radius-sm);
-  background: linear-gradient(135deg, var(--accent-primary) 0%, #a855f7 100%);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 1.2rem;
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
-}
-
-.brand-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--text-primary);
-}
-
-.brand-subtitle {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-}
-
 .header-actions {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+.header-logout-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+}
+
+/* Componente BrandLogo */
+.brand-logo-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  user-select: none;
+}
+
+.brand-logo-picture {
+  display: inline-flex;
+  align-items: center;
+}
+
+.brand-logo-img {
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08));
+}
+
+.brand-logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-logo-title {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+.brand-logo-subtitle {
+  color: var(--text-secondary);
+  line-height: 1.2;
+}
+
+/* Variantes de tamaño de BrandLogo */
+.brand-logo-sm .brand-logo-title {
+  font-size: 1rem;
+}
+.brand-logo-sm .brand-logo-subtitle {
+  font-size: 0.7rem;
+}
+
+.brand-logo-md .brand-logo-title {
+  font-size: 1.25rem;
+}
+.brand-logo-md .brand-logo-subtitle {
+  font-size: 0.75rem;
+}
+
+.brand-logo-lg .brand-logo-title {
+  font-size: 1.75rem;
+}
+.brand-logo-lg .brand-logo-subtitle {
+  font-size: 0.85rem;
 }
 
 /* Layout dividido (Split Layout) */
@@ -85,6 +115,30 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.notification-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 /* Panel principal (Dashboard / Listado de tareas) */
@@ -119,6 +173,10 @@
   gap: 1rem;
 }
 
+.task-card-completed {
+  opacity: 0.75;
+}
+
 .task-info {
   display: flex;
   flex-direction: column;
@@ -131,19 +189,31 @@
   color: var(--text-primary);
 }
 
+.task-title-completed {
+  text-decoration: line-through;
+}
+
 .task-desc {
   font-size: 0.85rem;
   color: var(--text-secondary);
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+/* Badges y utilidades */
+.badge-pending {
+  background: var(--accent-primary);
+  color: var(--accent-primary-fg);
 }
 
-.form-label {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+.badge-completed {
+  background: var(--accent-success-bg);
+  color: var(--accent-success);
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--glass-border-subtle);
+}
+
+.w-full {
+  width: 100%;
 }
