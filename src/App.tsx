@@ -1,3 +1,4 @@
+import { BrandLogo } from './components/BrandLogo';
 import './App.css';
 
 export default function App() {
@@ -5,13 +6,7 @@ export default function App() {
     <div className="app-shell">
       {/* Header Glassmorphism */}
       <header className="app-header glass-panel">
-        <div className="brand-wrapper">
-          <div className="brand-icon">C</div>
-          <div>
-            <h1 className="brand-title">Cuaderno</h1>
-            <span className="brand-subtitle">Gestor estratégico de tareas</span>
-          </div>
-        </div>
+        <BrandLogo size="md" />
         <div className="header-actions">
           <button className="glass-button glass-button-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
             Cerrar sesión
