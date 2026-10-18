@@ -1,18 +1,24 @@
-import { BrandLogo } from '../components/BrandLogo';
-import { useAuth } from '../hooks/useAuth';
+import { useState } from "react";
+import { BrandLogo } from "../components/BrandLogo";
+import { useAuth } from "../hooks/useAuth";
+import { formatCurrentDate } from "../utils/date.utils";
 
 export function TasksPage() {
   const { user, logout } = useAuth();
+  const [isFormOpenMobile, setIsFormOpenMobile] = useState(false);
 
   const handleLogout = async () => {
     try {
       await logout();
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+      console.error("Error al cerrar sesión:", error);
     }
   };
 
-  const userDisplayName = user?.displayName || user?.email?.split('@')[0] || 'Usuario';
+  const userDisplayName =
+    user?.displayName || user?.email?.split("@")[0] || "Usuario";
+
+  const todayFormatted = formatCurrentDate();
 
   return (
     <div className="app-shell">
@@ -42,50 +48,66 @@ export function TasksPage() {
         <aside className="sidebar-panel glass-panel">
           <div className="panel-title">
             <span>Crear Tarea</span>
+            <button
+              type="button"
+              className="glass-button glass-button-secondary mobile-form-toggle-btn"
+              onClick={() => setIsFormOpenMobile((prev) => !prev)}
+              aria-expanded={isFormOpenMobile}
+            >
+              {isFormOpenMobile ? "✕ Ocultar" : "+ Nueva Tarea"}
+            </button>
           </div>
 
-          <form onSubmit={(e) => e.preventDefault()} className="task-form">
-            <div className="form-group">
-              <label htmlFor="task-title-input" className="form-label">
-                Título
-              </label>
-              <input
-                id="task-title-input"
-                type="text"
-                className="glass-input"
-                placeholder="Ej. Revisar propuesta comercial"
-                readOnly
-                value="Revisar propuesta comercial"
-              />
+          <div className={`sidebar-collapsible ${isFormOpenMobile ? "is-open" : ""}`}>
+            <form onSubmit={(e) => e.preventDefault()} className="task-form">
+              <div className="form-group">
+                <label htmlFor="task-title-input" className="form-label">
+                  Título
+                </label>
+                <input
+                  id="task-title-input"
+                  type="text"
+                  className="glass-input"
+                  placeholder="Ej. Revisar propuesta comercial"
+                  readOnly
+                  value="Revisar propuesta comercial"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="task-desc-input" className="form-label">
+                  Descripción
+                </label>
+                <textarea
+                  id="task-desc-input"
+                  className="glass-textarea"
+                  rows={3}
+                  placeholder="Detalles de la tarea..."
+                  readOnly
+                  value="Analizar métricas del sprint y enviar informe a gerencia."
+                />
+              </div>
+
+              <button
+                type="button"
+                className="glass-button glass-button-primary w-full"
+              >
+                + Agregar Tarea
+              </button>
+            </form>
+
+            <hr className="divider" />
+
+            {/* Acción de AWS SES */}
+            <div className="notification-section">
+              <span className="form-label">Notificaciones</span>
+              <button
+                type="button"
+                className="glass-button glass-button-secondary w-full"
+              >
+                📧 Enviar resumen por Email
+              </button>
             </div>
-
-            <div className="form-group">
-              <label htmlFor="task-desc-input" className="form-label">
-                Descripción
-              </label>
-              <textarea
-                id="task-desc-input"
-                className="glass-textarea"
-                rows={3}
-                placeholder="Detalles de la tarea..."
-                readOnly
-                value="Analizar métricas del sprint y enviar informe a gerencia."
-              />
-            </div>
-
-            <button type="button" className="glass-button glass-button-primary w-full">
-              + Agregar Tarea
-            </button>
-          </form>
-
-          <hr className="divider" />
-
-          {/* Acción de AWS SES */}
-          <div className="notification-section">
-            <span className="form-label">Notificaciones</span>
-            <button type="button" className="glass-button glass-button-secondary w-full">
-              📧 Enviar resumen por Email
-            </button>
           </div>
         </aside>
 
@@ -93,8 +115,15 @@ export function TasksPage() {
         <section className="content-panel glass-panel">
           <div className="content-header">
             <div>
-              <h2 className="panel-title">Tareas de {userDisplayName}</h2>
-              <span className="brand-subtitle">Conectado a Firebase Cloud Firestore</span>
+              <h2 className="panel-title">Hola {userDisplayName}</h2>
+              <span className="brand-subtitle">
+                A continuación se encuentran tus tareas pendientes y
+                completadas.
+              </span>
+            </div>
+            <div className="current-date-badge">
+              <span className="date-badge-icon">📅</span>
+              <span>{todayFormatted}</span>
             </div>
           </div>
 
@@ -102,21 +131,21 @@ export function TasksPage() {
             <article className="task-card-preview glass-card">
               <div className="task-info">
                 <span className="task-title">Revisar propuesta comercial</span>
-                <span className="task-desc">Analizar métricas del sprint y enviar informe a gerencia.</span>
+                <span className="task-desc">
+                  Analizar métricas del sprint y enviar informe a gerencia.
+                </span>
               </div>
-              <span className="glass-badge badge-pending">
-                Pendiente
-              </span>
+              <span className="glass-badge badge-pending">Pendiente</span>
             </article>
 
             <article className="task-card-preview glass-card">
               <div className="task-info">
                 <span className="task-title">Autenticación completada</span>
-                <span className="task-desc">Sesión activa protegida con Firebase Auth.</span>
+                <span className="task-desc">
+                  Sesión activa protegida con Firebase Auth.
+                </span>
               </div>
-              <span className="glass-badge badge-pending">
-                Pendiente
-              </span>
+              <span className="glass-badge badge-pending">Pendiente</span>
             </article>
 
             <article className="task-card-preview glass-card task-card-completed">
@@ -124,11 +153,11 @@ export function TasksPage() {
                 <span className="task-title task-title-completed">
                   Definición de identidad visual
                 </span>
-                <span className="task-desc">Paletas y diseño de Glassmorphism acordados.</span>
+                <span className="task-desc">
+                  Paletas y diseño de Glassmorphism acordados.
+                </span>
               </div>
-              <span className="glass-badge badge-completed">
-                Completada
-              </span>
+              <span className="glass-badge badge-completed">Completada</span>
             </article>
           </div>
         </section>

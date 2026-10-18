@@ -21,7 +21,9 @@ export function BrandLogo({
   const imgSize = sizePixels[size];
 
   return (
-    <div className={`brand-logo-container brand-logo-${size} ${className}`.trim()}>
+    <div
+      className={`brand-logo-container brand-logo-${size} ${className}`.trim()}
+    >
       <picture className="brand-logo-picture">
         <source media="(prefers-color-scheme: dark)" srcSet={logoDark} />
         <img
@@ -36,7 +38,6 @@ export function BrandLogo({
       {showText && (
         <div className="brand-logo-text">
           <span className="brand-logo-title">Cuaderno</span>
-          <span className="brand-logo-subtitle">Gestor de tareas</span>
         </div>
       )}
     </div>

@@ -291,13 +291,39 @@
   .app-split-layout {
     grid-template-columns: 360px 1fr;
   }
+
+  .mobile-form-toggle-btn {
+    display: none !important;
+  }
+
+  .sidebar-collapsible {
+    display: flex !important;
+  }
 }
 
 .sidebar-panel {
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
+}
+
+.mobile-form-toggle-btn {
+  display: inline-flex;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+}
+
+.sidebar-collapsible {
+  display: none;
+  flex-direction: column;
+  gap: 1.25rem;
+  animation: fadeIn 0.22s ease-in-out;
+}
+
+.sidebar-collapsible.is-open {
+  display: flex;
 }
 
 .panel-title {
@@ -348,6 +374,23 @@
   gap: 0.75rem;
   border-bottom: 1px solid var(--glass-border-subtle);
   padding-bottom: 1rem;
+}
+
+.current-date-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--glass-bg-subtle);
+  border: 1px solid var(--glass-border-subtle);
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.date-badge-icon {
+  font-size: 0.9rem;
 }
 
 .tasks-list-preview {
