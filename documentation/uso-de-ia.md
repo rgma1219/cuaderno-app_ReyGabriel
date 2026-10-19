@@ -10,6 +10,12 @@
 
 - [Etapa 0: Ideación y Naming](#-etapa-0-ideación-y-naming)
 - [Etapa 1: Diseño de identidad visual y paletas UX/UI](#-etapa-1-diseño-de-identidad-visual-y-paletas-uxui)
+- [Etapa 2: Autenticación Robusta con Firebase Auth](#-etapa-2-autenticación-robusta-con-firebase-auth)
+- [Etapa 3: Persistencia Reactiva en Tiempo Real con Cloud Firestore](#-etapa-3-persistencia-reactiva-en-tiempo-real-con-cloud-firestore)
+- [Etapa 4: Componentes Accesibles con Glassmorphism y Métricas Dinámicas](#-etapa-4-componentes-accesibles-con-glassmorphism-y-métricas-dinámicas)
+- [Etapa 5: Arquitectura Serverless y Despacho de Correo con AWS SES](#-etapa-5-arquitectura-serverless-y-despacho-de-correo-con-aws-ses)
+- [Etapa 6: Testing Automatizado con Vitest y React Testing Library](#-etapa-6-testing-automatizado-con-vitest-y-react-testing-library)
+- [Etapa 7: Seguridad, Despliegue en Vercel y Resolución de Conflictos Cloud](#-etapa-7-seguridad-despliegue-en-vercel-y-resolución-de-conflictos-cloud)
 - [📋 Plantilla Reutilizable para Nuevas Interacciones](#-plantilla-reutilizable-para-nuevas-consultas)
 - [Guía para adjuntar capturas de pantalla](#-guía-para-adjuntar-capturas-de-pantalla)
 
@@ -172,6 +178,162 @@ _Captura 1.2: Adaptación de la identidad visual al tema claro, con tonos pastel
 - [x] **Criterios de diseño:** Establecer criterios generales de diseño responsive y Glassmorphism.
 
 **Resultado final:** La inteligencia artificial se utilizó como asistente de diseño gráfico y UX/UI para explorar una identidad visual, generar referencias gráficas y definir una base cromática para ambos temas. Las propuestas deberán integrarse y validarse durante el desarrollo de la aplicación.
+
+---
+
+## 🚀 Etapa 2: Autenticación Robusta con Firebase Auth
+
+### 📋 Ficha Técnica
+- **Fecha:** 18/10/2026
+- **Modelo:** Google Gemini / Antigravity AI
+- **Objetivo:** Implementar la capa de autenticación desacoplada con Firebase Auth, soporte multiproveedor (Email/Password y Google Popup), persistencia reactiva de sesión y traducción de errores a español.
+
+### 📥 1. Prompt Inicial (Usuario)
+> *"Diseña la capa de autenticación para Cuaderno usando Firebase Auth. Debe incluir inicio de sesión y registro con email y contraseña, Google Popup, persistencia de sesión con Context API y mensajes de error en español amigables para el usuario."*
+
+### 📤 2. Respuesta de la IA
+- **Arquitectura desacoplada:** Separar la lógica en `src/services/auth.service.ts` mediante un adaptador de dominio `formatUserSession` que transforme el objeto nativo `User` de Firebase en un tipo limpio `UserSession`.
+- **Mapeo de errores exhaustivo:** Función `mapFirebaseAuthError` que traduzca códigos como `auth/user-not-found`, `auth/wrong-password` e `auth/email-already-in-use` a español claro.
+- **Estado global optimizado:** `AuthContext.tsx` con `onAuthStateChanged` para mantener la sesión viva entre recargas de página y `useMemo` para evitar re-renderizados innecesarios.
+
+### 🔄 3. Análisis Crítico y Modificaciones del Desarrollador
+- **¿Qué se adoptó?:** El patrón adaptador para aislar el SDK de Firebase del resto de la aplicación y la traducción completa de errores.
+- **¿Qué se modificó o refinó?:** Se implementó una guardia de carga (`isLoading`) en `ProtectedRoute.tsx` para evitar parpadeos visuales (*layout shift*) al recargar páginas protegidas como `/tasks`.
+
+### 📌 4. Conclusiones y Decisiones Tomadas
+- [x] Autenticación dual completa (Email/Password + Google).
+- [x] Cero acoplamiento directo de Firebase en los componentes de UI.
+
+---
+
+## 🚀 Etapa 3: Persistencia Reactiva en Tiempo Real con Cloud Firestore
+
+### 📋 Ficha Técnica
+- **Fecha:** 18/10/2026
+- **Modelo:** Google Gemini / Antigravity AI
+- **Objetivo:** Diseñar el modelo de datos NoSQL y el servicio de persistencia reactiva en tiempo real para las tareas de los usuarios.
+
+### 📥 1. Prompt Inicial (Usuario)
+> *"Implementa el servicio de tareas con Cloud Firestore. Debe sincronizarse en tiempo real con onSnapshot, filtrar por el usuario logueado y permitir crear, editar, alternar estado y eliminar tareas."*
+
+### 📤 2. Respuesta de la IA
+- **Estructura NoSQL:** Colección `tasks` con campos `id`, `userId`, `title`, `description`, `completed`, `createdAt`, `updatedAt`.
+- **Servicio reactivo:** Función `subscribeUserTasks(userId, callback)` que se suscribe a los cambios mediante `onSnapshot` y retorna la función de desuscripción (*cleanup*).
+- **Custom Hook:** `useTasks` que expone las tareas, estados de carga y métricas automáticas (`totalCount`, `pendingCount`, `completedCount`).
+
+### 🔄 3. Análisis Crítico y Modificaciones del Desarrollador
+- **Decisión arquitectónica clave (Cero costo de índices):** En lugar de forzar un `orderBy('createdAt', 'desc')` en la consulta de Firestore que exigiría crear índices compuestos obligatorios en Firebase Console, se realizó la consulta filtrando por `where('userId', '==', userId)` y el ordenamiento descendente se procesó en memoria en el cliente. Esto garantiza velocidad instantánea y elimina fricción de configuración.
+
+### 📌 4. Conclusiones y Decisiones Tomadas
+- [x] Suscripción en tiempo real con limpieza automática de listeners al desmontar componentes.
+- [x] CRUD completo sin dependencias externas pesadas.
+
+---
+
+## 🚀 Etapa 4: Componentes Accesibles con Glassmorphism y Métricas Dinámicas
+
+### 📋 Ficha Técnica
+- **Fecha:** 18/10/2026
+- **Modelo:** Google Gemini / Antigravity AI
+- **Objetivo:** Desarrollar los componentes de interfaz de usuario con diseño Glassmorphism, accesibilidad y validaciones de borde.
+
+### 📥 1. Prompt Inicial (Usuario)
+> *"Crea los componentes de TodoForm, TodoItem, TodoList y la página TasksPage con métricas interactivas y diseño Glassmorphism en CSS puro."*
+
+### 📤 2. Respuesta de la IA
+- **Componentes modulares:**
+  - `TodoForm`: Formulario controlado con validación de títulos no vacíos y estado de carga mientras se guarda.
+  - `TodoItem`: Ítem de tarea con selector circular, modo de edición en línea (*inline edit*) y confirmación de eliminación accesible.
+  - `TodoList`: Renderizado con skeleton shimmer durante la carga y pestañas de filtrado (*Todas*, *Pendientes*, *Completadas*).
+  - `TasksPage`: Métricas en tarjetas translúcidas con barra de progreso porcentual dinámica.
+
+### 🔄 3. Análisis Crítico y Modificaciones del Desarrollador
+- **Actualización a React 19:** Se identificó que React 19 deprecó el tipo genérico `FormEvent`. Se reemplazó preventivamente por `type SyntheticEvent<HTMLFormElement>` asegurando compatibilidad estricta sin advertencias del compilador.
+
+### 📌 4. Conclusiones y Decisiones Tomadas
+- [x] Interfaz 100% responsiva y accesible con navegación por teclado y atributos ARIA.
+- [x] Cero librerías de estilos adicionales: Vanilla CSS con tokens y desenfoque Apple de 20px.
+
+---
+
+## 🚀 Etapa 5: Arquitectura Serverless y Despacho de Correo con AWS SES
+
+### 📋 Ficha Técnica
+- **Fecha:** 18/10/2026
+- **Modelo:** Google Gemini / Antigravity AI
+- **Objetivo:** Diseñar la función serverless en Vercel para despachar resúmenes de tareas mediante AWS SES v3 con plantillas profesionales duales.
+
+### 📥 1. Prompt Inicial (Usuario)
+> *"Configura la función serverless en api/send-summary.ts para despachar correos usando AWS SES con el SDK v3. Debe recibir recipientEmail y tasks, validar el payload y enviar un correo con diseño HTML profesional y versión en texto plano."*
+
+### 📤 2. Respuesta de la IA
+- **Servidor Serverless:** Handler exportado en `api/send-summary.ts` que valida método POST, estructura del JSON y campos obligatorios.
+- **Seguridad en la nube:** Las credenciales secretas (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`) se leen exclusivamente en el servidor y nunca se exponen al navegador.
+- **Plantilla dual:** Generador de HTML con diseño responsive y tabla de tareas, más generador de texto plano (`buildPlainTextTemplate`) como respaldo de accesibilidad.
+
+### 🔄 3. Análisis Crítico y Modificaciones del Desarrollador
+- **Validación de borde de negocio:** Se incorporó la validación explícita de que el arreglo de tareas no puede estar vacío (`tasks.length > 0`), devolviendo un código 400 descriptivo si el usuario intenta enviar un resumen sin tareas registradas.
+
+### 📌 4. Conclusiones y Decisiones Tomadas
+- [x] Función Serverless desacoplada de la UI.
+- [x] Integración con `@aws-sdk/client-ses` (SDK v3 modular y liviano).
+
+---
+
+## 🚀 Etapa 6: Testing Automatizado con Vitest y React Testing Library
+
+### 📋 Ficha Técnica
+- **Fecha:** 18/10/2026
+- **Modelo:** Google Gemini / Antigravity AI
+- **Objetivo:** Configurar el entorno de pruebas unitarias y de componentes con Vitest y React Testing Library, garantizando cobertura de casos borde y cero advertencias en consola.
+
+### 📥 1. Prompt Inicial (Usuario)
+> *"Configura Vitest en el proyecto y crea pruebas unitarias para los servicios y utilidades, y pruebas de componentes para TodoForm y TodoList simulando las llamadas asíncronas."*
+
+### 📤 2. Respuesta de la IA
+- **Configuración de Vitest:** Integración en `vite.config.ts` importando `defineConfig` de `'vitest/config'` con entorno `jsdom` y configuración global en `tests/setup.ts`.
+- **Mocks globales:** Uso de `vi.stubGlobal('fetch', mockFn)` y `vi.unstubAllGlobals()` para aislar las llamadas de red del servicio de email.
+- **Cobertura de 27 pruebas:** Pruebas unitarias de fechas, autenticación y email, más pruebas de componentes con simulación de eventos mediante `@testing-library/user-event`.
+
+### 🔄 3. Análisis Crítico y Modificaciones del Desarrollador
+- **Depuración de advertencias de React 19 `act(...)`:** Al ejecutar `npm run test`, se detectó un warning en la prueba de estado asíncrono de `TodoForm`. El desarrollador identificó que la resolución de la promesa quedaba flotando fuera del ciclo de actualización del componente y la envolvió en un `await waitFor(...)`, logrando una salida 100% limpia en los 27 tests.
+
+### 📌 4. Conclusiones y Decisiones Tomadas
+- [x] 27 tests pasando en verde (5 archivos de prueba).
+- [x] Validación de casos de éxito, errores de red y validaciones de formulario.
+
+---
+
+## 🚀 Etapa 7: Seguridad, Despliegue en Vercel y Resolución de Conflictos Cloud
+
+### 📋 Ficha Técnica
+- **Fecha:** 18/10/2026
+- **Modelo:** Google Gemini / Antigravity AI
+- **Objetivo:** Implementar las reglas de Firestore, desplegar la aplicación en Vercel y resolver los conflictos de autorización y región en AWS SES.
+
+### 📥 1. Interacción Clave: Diagnóstico y Resolución del Error de AWS SES
+> *"El despliegue funcionó. Puedo iniciar sesión y crear tareas, pero al enviar correo sale el error: User 'cuaderno-ses-service' is not authorized to perform 'ses:SendEmail' on resource 'arn:aws:ses:us-east-1:...'"*
+
+### 📤 2. Análisis e Investigación Técnica de la IA
+1. **Detección de Service Control Policy (SCP):** Al examinar la consola de AWS, se descubrió que la cuenta institucional de AWS tiene un bloqueo administrativo a nivel de organización para `us-east-1` y solo permite operar en **`us-east-2` (Ohio)**.
+2. **Descubrimiento de variable reservada en Vercel:** Se investigó la documentación técnica de Vercel y se determinó que las Serverless Functions inyectan por defecto la variable del sistema `AWS_REGION=us-east-1` al correr en el datacenter de Washington (`iad1`), sobrescribiendo cualquier variable con ese mismo nombre.
+
+### 🔄 3. Solución Implementada por el Desarrollador
+- Se configuró la identidad verificada en AWS SES en la región permitida **`us-east-2` (Ohio)**.
+- En [api/send-summary.ts](file:///api/send-summary.ts), se desacopló la lectura de la región asignando **`us-east-2`** por defecto y habilitando la variable no reservada **`AWS_SES_REGION`**:
+  ```typescript
+  const awsRegion =
+    process.env.AWS_SES_REGION ||
+    (process.env.AWS_REGION && process.env.AWS_REGION !== 'us-east-1'
+      ? process.env.AWS_REGION
+      : 'us-east-2');
+  ```
+- **Resultado:** El correo de resumen llegó inmediatamente a la bandeja de entrada, validando la arquitectura completa en producción.
+
+### 📌 4. Conclusiones y Decisiones Tomadas
+- [x] Despliegue funcional en producción en Vercel: [https://cuaderno-app-rey-gabriel-indol.vercel.app](https://cuaderno-app-rey-gabriel-indol.vercel.app).
+- [x] Base de datos blindada con `firestore.rules`.
+- [x] Flujo de correo serverless 100% operativo en la nube.
 
 ---
 
