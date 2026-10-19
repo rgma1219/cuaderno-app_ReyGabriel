@@ -5,6 +5,7 @@ import { TodoList } from "../components/TodoList";
 import { useAuth } from "../hooks/useAuth";
 import { useTasks } from "../hooks/useTasks";
 import { formatCurrentDate } from "../utils/date.utils";
+import { sendTaskSummaryEmail } from "../services/email.service";
 
 export function TasksPage() {
   const { user, logout } = useAuth();
@@ -20,6 +21,11 @@ export function TasksPage() {
     completedCount,
   } = useTasks();
   const [isFormOpenMobile, setIsFormOpenMobile] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [emailFeedback, setEmailFeedback] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
 
   const handleLogout = async () => {
     try {
@@ -37,6 +43,42 @@ export function TasksPage() {
   const totalCount = tasks.length;
   const progressPercentage =
     totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+  const handleSendEmailSummary = async () => {
+    if (!user?.email || tasks.length === 0 || isSendingEmail) return;
+
+    setIsSendingEmail(true);
+    setEmailFeedback(null);
+
+    try {
+      const response = await sendTaskSummaryEmail({
+        recipientEmail: user.email,
+        userDisplayName,
+        tasks,
+      });
+
+      setEmailFeedback({
+        type: "success",
+        message: response.message || "¡Resumen enviado con éxito a tu correo!",
+      });
+
+      // Auto-ocultar mensaje de éxito tras 6 segundos
+      setTimeout(() => {
+        setEmailFeedback(null);
+      }, 6000);
+    } catch (err) {
+      const msg =
+        err instanceof Error
+          ? err.message
+          : "Ocurrió un error al despachar el correo.";
+      setEmailFeedback({
+        type: "error",
+        message: msg,
+      });
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
 
   return (
     <div className="app-shell">
@@ -114,17 +156,31 @@ export function TasksPage() {
             {/* Acción de AWS SES */}
             <div className="notification-section">
               <span className="form-label">Notificaciones</span>
+
+              {emailFeedback && (
+                <div
+                  className={`glass-alert glass-alert-${emailFeedback.type}`}
+                  role="alert"
+                >
+                  <span className="alert-icon">
+                    {emailFeedback.type === "success" ? "✅" : "⚠️"}
+                  </span>
+                  <span className="alert-text">{emailFeedback.message}</span>
+                </div>
+              )}
+
               <button
                 type="button"
                 className="glass-button glass-button-secondary w-full"
-                disabled={totalCount === 0}
+                onClick={handleSendEmailSummary}
+                disabled={totalCount === 0 || isSendingEmail}
                 title={
                   totalCount === 0
                     ? "Crea al menos una tarea para enviar el resumen"
-                    : "Enviar resumen por correo electrónico"
+                    : `Enviar resumen por correo electrónico a ${user?.email}`
                 }
               >
-                📧 Enviar resumen por Email
+                {isSendingEmail ? "Enviando resumen..." : "📧 Enviar resumen por Email"}
               </button>
               {totalCount === 0 && (
                 <span className="form-hint-text">

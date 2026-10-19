@@ -114,8 +114,15 @@ export function TodoList({
           style={{ padding: "2rem 1.5rem" }}
         >
           <p className="empty-state-subtitle">
-            No hay tareas en el filtro seleccionado (
-            <strong>{activeFilter}</strong>).
+            No tienes tareas en el filtro seleccionado (
+            <strong>
+              {activeFilter === 'pending'
+                ? 'Pendientes'
+                : activeFilter === 'completed'
+                ? 'Completadas'
+                : 'Todas'}
+            </strong>
+            ).
           </p>
         </div>
       ) : (
