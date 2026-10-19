@@ -1,5 +1,5 @@
-import { useState, type SyntheticEvent } from 'react';
-import type { TaskCreateInput } from '../types/task.types';
+import { useState, type SyntheticEvent } from "react";
+import type { TaskCreateInput } from "../types/task.types";
 
 export interface TodoFormProps {
   onAddTask: (task: TaskCreateInput) => Promise<string | void>;
@@ -12,8 +12,8 @@ export interface TodoFormProps {
  * y estados de carga para evitar envíos múltiples.
  */
 export function TodoForm({ onAddTask, onSuccess }: TodoFormProps) {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -23,7 +23,7 @@ export function TodoForm({ onAddTask, onSuccess }: TodoFormProps) {
     // Caso borde: Validación de título vacío o con solo espacios
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
-      setErrorMessage('El título de la tarea es obligatorio.');
+      setErrorMessage("El título de la tarea es obligatorio.");
       return;
     }
 
@@ -37,14 +37,14 @@ export function TodoForm({ onAddTask, onSuccess }: TodoFormProps) {
       });
 
       // Limpiar formulario tras éxito
-      setTitle('');
-      setDescription('');
+      setTitle("");
+      setDescription("");
       onSuccess?.();
     } catch (err) {
       if (err instanceof Error) {
         setErrorMessage(err.message);
       } else {
-        setErrorMessage('Ocurrió un error al intentar crear la tarea.');
+        setErrorMessage("Ocurrió un error al intentar crear la tarea.");
       }
     } finally {
       setIsSubmitting(false);
@@ -62,7 +62,8 @@ export function TodoForm({ onAddTask, onSuccess }: TodoFormProps) {
 
       <div className="form-group">
         <label htmlFor="todo-form-title" className="form-label">
-          Título de la Tarea <span style={{ color: 'var(--accent-primary)' }}>*</span>
+          Título de la tarea{" "}
+          <span style={{ color: "var(--accent-primary)" }}>*</span>
         </label>
         <input
           id="todo-form-title"
@@ -81,7 +82,7 @@ export function TodoForm({ onAddTask, onSuccess }: TodoFormProps) {
 
       <div className="form-group">
         <label htmlFor="todo-form-description" className="form-label">
-          Descripción o Notas (Opcional)
+          Descripción (Opcional)
         </label>
         <textarea
           id="todo-form-description"
@@ -100,7 +101,7 @@ export function TodoForm({ onAddTask, onSuccess }: TodoFormProps) {
         className="glass-button glass-button-primary w-full"
         disabled={isSubmitting}
       >
-        {isSubmitting ? 'Guardando tarea...' : '+ Agregar Tarea'}
+        {isSubmitting ? "Guardando tarea..." : "+ Agregar Tarea"}
       </button>
     </form>
   );

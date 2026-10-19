@@ -104,10 +104,10 @@ export function TasksPage() {
 
       {/* Layout dividido (Desktop 2 columnas, Mobile apilado) */}
       <main className="app-split-layout">
-        {/* Panel lateral: Formulario de creación y acciones */}
+        {/* Panel lateral: Formulario de creación exclusivamente */}
         <aside className="sidebar-panel glass-panel">
           <div className="panel-title">
-            <span>Crear Tarea</span>
+            <span>Crear tarea</span>
             <button
               type="button"
               className="glass-button glass-button-secondary mobile-form-toggle-btn"
@@ -125,76 +125,13 @@ export function TasksPage() {
               onAddTask={addTask}
               onSuccess={() => setIsFormOpenMobile(false)}
             />
-
-            {/* Barra de Progreso en Vivo */}
-            {totalCount > 0 && (
-              <div className="task-progress-card">
-                <div className="progress-info-header">
-                  <span className="progress-label">Progreso</span>
-                  <span className="progress-value">{progressPercentage}%</span>
-                </div>
-                <div
-                  className="progress-track"
-                  role="progressbar"
-                  aria-valuenow={progressPercentage}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                >
-                  <div
-                    className="progress-fill"
-                    style={{ width: `${progressPercentage}%` }}
-                  />
-                </div>
-                <span className="progress-subtext">
-                  {completedCount} de {totalCount} tareas completadas
-                </span>
-              </div>
-            )}
-
-            <hr className="divider" />
-
-            {/* Acción de AWS SES */}
-            <div className="notification-section">
-              <span className="form-label">Notificaciones</span>
-
-              {emailFeedback && (
-                <div
-                  className={`glass-alert glass-alert-${emailFeedback.type}`}
-                  role="alert"
-                >
-                  <span className="alert-icon">
-                    {emailFeedback.type === "success" ? "✅" : "⚠️"}
-                  </span>
-                  <span className="alert-text">{emailFeedback.message}</span>
-                </div>
-              )}
-
-              <button
-                type="button"
-                className="glass-button glass-button-secondary w-full"
-                onClick={handleSendEmailSummary}
-                disabled={totalCount === 0 || isSendingEmail}
-                title={
-                  totalCount === 0
-                    ? "Crea al menos una tarea para enviar el resumen"
-                    : `Enviar resumen por correo electrónico a ${user?.email}`
-                }
-              >
-                {isSendingEmail ? "Enviando resumen..." : "📧 Enviar resumen por Email"}
-              </button>
-              {totalCount === 0 && (
-                <span className="form-hint-text">
-                  Agrega al menos una tarea para habilitar el envío de resumen.
-                </span>
-              )}
-            </div>
           </div>
         </aside>
 
-        {/* Panel principal: Listado de tareas */}
+        {/* Panel principal: Listado de tareas, progreso y acciones */}
         <section className="content-panel glass-panel">
           <div className="content-header">
-            <div>
+            <div className="content-header-info">
               <h2 className="panel-title">Hola {userDisplayName}</h2>
               <span className="brand-subtitle">
                 {loading
@@ -204,11 +141,81 @@ export function TasksPage() {
                     : `Tienes ${pendingCount} ${pendingCount === 1 ? "tarea pendiente" : "tareas pendientes"} y ${completedCount} ${completedCount === 1 ? "completada" : "completadas"}.`}
               </span>
             </div>
-            <div className="current-date-badge">
-              <span className="date-badge-icon">📅</span>
-              <span>{todayFormatted}</span>
+
+            <div className="content-header-actions">
+              {/* Fecha del día actual */}
+              <div className="current-date-badge">
+                <span className="date-badge-icon">📅</span>
+                <span>{todayFormatted}</span>
+              </div>
+
+              {/* Botón para enviar resumen */}
+              <button
+                type="button"
+                className="glass-button glass-button-secondary header-action-btn"
+                onClick={handleSendEmailSummary}
+                disabled={totalCount === 0 || isSendingEmail}
+                title={
+                  totalCount === 0
+                    ? "Crea al menos una tarea para enviar el resumen"
+                    : `Enviar resumen por correo electrónico a ${user?.email}`
+                }
+              >
+                {isSendingEmail ? (
+                  <>
+                    <span className="action-btn-spinner" />
+                    <span>Enviando...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>📧</span>
+                    <span className="email-btn-text">Enviar resumen</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
+
+          {/* Feedback de envío de correo */}
+          {emailFeedback && (
+            <div
+              className={`glass-alert glass-alert-${emailFeedback.type}`}
+              role="alert"
+            >
+              <span className="alert-icon">
+                {emailFeedback.type === "success" ? "✅" : "⚠️"}
+              </span>
+              <span className="alert-text">{emailFeedback.message}</span>
+            </div>
+          )}
+
+          {/* Barra de Progreso en Vivo */}
+          {totalCount > 0 && (
+            <div className="task-progress-card content-progress-card">
+              <div className="progress-info-header">
+                <div className="progress-label-wrap">
+                  <span className="progress-label">Progreso general</span>
+                  <span className="progress-subtext">
+                    ({completedCount} de {totalCount}{" "}
+                    {totalCount === 1 ? "tarea" : "tareas"})
+                  </span>
+                </div>
+                <span className="progress-value">{progressPercentage}%</span>
+              </div>
+              <div
+                className="progress-track"
+                role="progressbar"
+                aria-valuenow={progressPercentage}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              >
+                <div
+                  className="progress-fill"
+                  style={{ width: `${progressPercentage}%` }}
+                />
+              </div>
+            </div>
+          )}
 
           <TodoList
             tasks={tasks}
