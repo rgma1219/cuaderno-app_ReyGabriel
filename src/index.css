@@ -1,10 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Tipografía */
+  /* Tipografía y geometría compartida */
   --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
 
-  /* Tema Claro (Default) */
+  --transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-theme: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   Tokens Tema Claro (Default)
+   ========================================================================== */
+:root,
+[data-theme="light"] {
   --color-bg-base: #f1f5f9;
   --color-bg-mesh-1: rgba(167, 216, 255, 0.45);
   --color-bg-mesh-2: rgba(199, 184, 255, 0.35);
@@ -31,18 +44,42 @@
   --accent-success-bg: rgba(5, 150, 105, 0.12);
   --accent-danger: #dc2626;
   --accent-danger-bg: rgba(220, 38, 38, 0.1);
-
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-full: 9999px;
-
-  --transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ==========================================================================
+   Tokens Tema Oscuro (Manual o Automático)
+   ========================================================================== */
+[data-theme="dark"] {
+  --color-bg-base: #0a0f1d;
+  --color-bg-mesh-1: rgba(30, 58, 138, 0.35);
+  --color-bg-mesh-2: rgba(88, 28, 135, 0.3);
+  --color-bg-mesh-3: rgba(15, 23, 42, 0.8);
+
+  --glass-bg: rgba(22, 30, 49, 0.68);
+  --glass-bg-hover: rgba(30, 41, 67, 0.8);
+  --glass-bg-subtle: rgba(22, 30, 49, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-border-subtle: rgba(255, 255, 255, 0.06);
+  --glass-shadow: 0 12px 36px -6px rgba(0, 0, 0, 0.5), 0 4px 14px -2px rgba(0, 0, 0, 0.35);
+  --glass-shadow-hover: 0 20px 40px -4px rgba(0, 0, 0, 0.6), 0 8px 20px -2px rgba(0, 0, 0, 0.45);
+
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  --accent-primary: #3b82f6;
+  --accent-primary-hover: #60a5fa;
+  --accent-primary-fg: #ffffff;
+
+  --accent-success: #34d399;
+  --accent-success-bg: rgba(52, 211, 153, 0.16);
+  --accent-danger: #f87171;
+  --accent-danger-bg: rgba(248, 113, 113, 0.15);
+}
+
+/* Fallback de modo oscuro por preferencia de sistema si no se forzó 'light' */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --color-bg-base: #0a0f1d;
     --color-bg-mesh-1: rgba(30, 58, 138, 0.35);
     --color-bg-mesh-2: rgba(88, 28, 135, 0.3);
@@ -98,7 +135,25 @@ body {
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-size: cover;
+  transition: background-color var(--transition-theme), color var(--transition-theme);
 }
+
+/* Scrollbar moderno */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
 
 /* Clases de Utilidad Glassmorphism */
 .glass-panel {

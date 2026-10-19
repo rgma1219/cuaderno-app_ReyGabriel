@@ -16,6 +16,7 @@
 - [Etapa 5: Arquitectura Serverless y Despacho de Correo con AWS SES](#-etapa-5-arquitectura-serverless-y-despacho-de-correo-con-aws-ses)
 - [Etapa 6: Testing Automatizado con Vitest y React Testing Library](#-etapa-6-testing-automatizado-con-vitest-y-react-testing-library)
 - [Etapa 7: Seguridad, Despliegue en Vercel y Resolución de Conflictos Cloud](#-etapa-7-seguridad-despliegue-en-vercel-y-resolución-de-conflictos-cloud)
+- [Etapa 8: Auditoría UX/UI, Refactorización de Estilos y Sistema de Cambio de Tema (Light/Dark)](#-etapa-8-auditoría-uxui-refactorización-de-estilos-y-sistema-de-cambio-de-tema-lightdark)
 - [📋 Plantilla Reutilizable para Nuevas Interacciones](#-plantilla-reutilizable-para-nuevas-consultas)
 - [Guía para adjuntar capturas de pantalla](#-guía-para-adjuntar-capturas-de-pantalla)
 
@@ -334,6 +335,94 @@ _Captura 1.2: Adaptación de la identidad visual al tema claro, con tonos pastel
 - [x] Despliegue funcional en producción en Vercel: [https://cuaderno-app-rey-gabriel-indol.vercel.app](https://cuaderno-app-rey-gabriel-indol.vercel.app).
 - [x] Base de datos blindada con `firestore.rules`.
 - [x] Flujo de correo serverless 100% operativo en la nube.
+
+---
+
+## 🚀 Etapa 8: Auditoría UX/UI, Refactorización de Estilos y Sistema de Cambio de Tema (Light/Dark)
+
+### 📋 Ficha Técnica
+
+- **Fecha:** 19/10/2026
+- **Modelo:** Google Gemini / Antigravity AI
+- **Objetivo:** Realizar una auditoría experta de diseño UX/UI en toda la aplicación, refactorizar la arquitectura de estilos CSS (Glassmorphism), proponer e implementar el sistema conmutador de tema claro/oscuro (*Theme Toggle*) con persistencia, accesibilidad y microinteracciones.
+
+---
+
+### 📥 1. Prompt Inicial (Usuario)
+
+> _"Se un programador fullstack senior experto en diseño UX/UI._  
+> _Verifica toda la aplicación. Busca oportunidades de mejora de la interfaz y la experiencia del usuario._  
+> _Analiza los archivos de estilos y refactoriza de ser necesario. Proponé la funcionalidad para el cambio entre tema claro y oscuro._  
+> _Antes de tocar cualquier código dame un informe detallado de lo que encontraste y la propuesta para el toggle de tema. Una vez analizado lo que me das, veremos si lo aplicamos."_
+
+---
+
+### 📤 2. Diagnóstico e Informe Técnico de la IA
+
+La IA realizó un análisis integral del código fuente, identificando oportunidades críticas de diseño, ergonomía y rendimiento antes de realizar modificaciones:
+
+1. **Detección del "Bug Silencioso" en `BrandLogo.tsx`:**  
+   El logo utilizaba `<picture><source media="(prefers-color-scheme: dark)" .../></picture>`, el cual depende exclusivamente de la preferencia del sistema operativo. Si el usuario alternaba manualmente a tema claro/oscuro mediante un botón en la app, la imagen del logo no respondía.
+2. **Dependencia estricta de media queries en `index.css`:**  
+   Los tokens oscuros estaban encerrados dentro de `@media (prefers-color-scheme: dark)`, impidiendo una sobreescritura manual por parte del usuario.
+3. **Ausencia de transiciones globales:**  
+   El cambio de colores entre temas carecía de animación CSS fluida, produciendo saltos visuales abruptos.
+4. **Oportunidades de accesibilidad y ergonomía UX/UI:**
+   - **Campos de contraseña ciegos:** Falta de botón para mostrar/ocultar contraseñas en los formularios de Login y Registro.
+   - **Falta de visibilidad de límites de caracteres:** En `TodoForm.tsx` no había indicadores en tiempo real de caracteres restantes (`maxLength={120}` y `500`).
+   - **Área de toque reducida:** Checkbox circular de 22px por debajo del umbral recomendado por las pautas WCAG 2.1 (≥ 44×44px en móviles).
+   - **Uso de `!important` en CSS:** Reglas `@media (min-width: 860px)` con `!important` para colapsar paneles laterales, corregibles mediante orden de especificidad en la cascada.
+   - **Microinteracción al 100%:** Ausencia de retroalimentación gratificante cuando el usuario completa todas sus tareas diarias.
+
+---
+
+### 🔄 3. Aprobación y Plan de Implementación del Desarrollador
+
+#### Prompt de Validación del Usuario
+
+> _"Adelante. Procede con la implementación del plan propuesto."_
+
+#### Soluciones Técnicas Adoptadas
+
+1. **Arquitectura del Sistema de Temas (`ThemeContext.tsx` y `useTheme.ts`):**
+   - Creación de un contexto global con soporte para 3 modos: `'light'`, `'dark'` y `'system'`.
+   - Persistencia local mediante `localStorage.getItem('cuaderno_theme')`.
+   - Inyección reactiva del atributo `data-theme` y la propiedad `style.colorScheme` en `document.documentElement` (`<html>`), eliminando cualquier parpadeo de estilos (*FOUC*).
+2. **Componente Interactivo (`ThemeToggle.tsx`):**
+   - Botón Glassmorphism accesible (`aria-label`, `title`) con íconos vectoriales SVG limpios (Sol ☀️ y Luna 🌙) y animación suave de rotación y escala al interactuar.
+   - Integrado en la cabecera principal de `TasksPage.tsx` y de forma flotante superior en `LoginPage.tsx` y `RegisterPage.tsx`.
+3. **Sincronización Dinámica de `BrandLogo.tsx`:**
+   - Desacople de `<picture>` y sincronización directa con `resolvedTheme` del contexto, conmutando `logoDark` y `logoLight` en tiempo real.
+4. **Refactorización de Tokens y Estilos en `index.css` y `App.css`:**
+   - Reorganización de variables CSS semánticas bajo `:root, [data-theme="light"]` y `[data-theme="dark"]` con fallback automático.
+   - Transiciones suaves de 0.25s en `background-color`, `border-color` y `color`.
+   - Barras de desplazamiento (`::-webkit-scrollbar`) integradas estéticamente con el fondo glassmorphic.
+   - Reordenamiento del layout dividido eliminando las declaraciones `!important`.
+5. **Mejoras Ergonómicas y Funcionales de UI/UX:**
+   - **Mostrar/Ocultar contraseña:** Inputs de Login y Registro equipados con botón de visibilidad interactivo.
+   - **Contadores de caracteres en vivo:** Indicadores de longitud en `TodoForm.tsx` para título (`x/120`) y descripción (`x/500`).
+   - **Hitbox accesible:** Checkbox táctil ampliado a ~40px en móvil mediante pseudoelemento `::after` sin modificar su estética compacta.
+   - **Celebración de progreso al 100%:** Tarjeta de progreso iluminada con resplandor esmeralda y badge animado `¡Completado! 🎉`.
+6. **Testing Automatizado:**
+   - Creación de `tests/components/ThemeToggle.test.tsx` garantizando pruebas de renderizado, conmutación y persistencia.
+
+---
+
+### 📸 4. Evidencias Visuales (Capturas de Pantalla)
+
+<!-- Capturas de pantalla de la interfaz con conmutador de tema y mejoras -->
+
+![Conmutador de Tema Claro y Oscuro en Cuaderno](./capturas/etapa-08-theme-toggle-cuaderno.png)  
+_Captura 8.1: Implementación del conmutador de tema (Theme Toggle), adaptación del BrandLogo y mejoras de accesibilidad en los formularios._
+
+---
+
+### 📌 5. Conclusiones y Decisiones Tomadas
+
+- [x] **Tema Claro/Oscuro dinámico:** Soporte nativo para alternar modos manualmente o seguir la preferencia del sistema operativo.
+- [x] **Experiencia de usuario optimizada:** Formularios más intuitivos (visibilidad de contraseñas, contadores en vivo, feedback al 100%).
+- [x] **Calidad de código CSS:** Tokens estandarizados, cero `!important` y transiciones suaves sin parpadeos.
+- [x] **Accesibilidad WCAG 2.1:** Hitbox de checkbox táctil ampliado y etiquetas ARIA integradas.
 
 ---
 

@@ -61,10 +61,13 @@ export function TodoForm({ onAddTask, onSuccess }: TodoFormProps) {
       )}
 
       <div className="form-group">
-        <label htmlFor="todo-form-title" className="form-label">
-          Título de la tarea{" "}
-          <span style={{ color: "var(--accent-primary)" }}>*</span>
-        </label>
+        <div className="form-label-row">
+          <label htmlFor="todo-form-title" className="form-label">
+            Título de la tarea{" "}
+            <span style={{ color: "var(--accent-primary)" }}>*</span>
+          </label>
+          <span className="char-counter">{title.length}/120</span>
+        </div>
         <input
           id="todo-form-title"
           type="text"
@@ -81,9 +84,14 @@ export function TodoForm({ onAddTask, onSuccess }: TodoFormProps) {
       </div>
 
       <div className="form-group">
-        <label htmlFor="todo-form-description" className="form-label">
-          Descripción (Opcional)
-        </label>
+        <div className="form-label-row">
+          <label htmlFor="todo-form-description" className="form-label">
+            Descripción o notas (Opcional)
+          </label>
+          {description.length > 0 && (
+            <span className="char-counter">{description.length}/500</span>
+          )}
+        </div>
         <textarea
           id="todo-form-description"
           className="glass-textarea"

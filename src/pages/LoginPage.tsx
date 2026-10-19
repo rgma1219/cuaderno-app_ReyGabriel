@@ -2,6 +2,7 @@ import { useState, type SyntheticEvent } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { BrandLogo } from '../components/BrandLogo';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 export function LoginPage() {
   const { login, loginWithGoogle, user, loading: authLoading } = useAuth();
@@ -9,6 +10,7 @@ export function LoginPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -56,6 +58,9 @@ export function LoginPage() {
 
   return (
     <div className="auth-page-container">
+      <div className="auth-theme-toggle-wrap">
+        <ThemeToggle />
+      </div>
       <div className="auth-card glass-panel">
         <header className="auth-header">
           <BrandLogo size="lg" />
@@ -91,17 +96,29 @@ export function LoginPage() {
             <label htmlFor="login-password" className="form-label">
               Contraseña
             </label>
-            <input
-              id="login-password"
-              type="password"
-              required
-              autoComplete="current-password"
-              className="glass-input"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isSubmitting}
-            />
+            <div className="password-input-wrapper">
+              <input
+                id="login-password"
+                type={showPassword ? 'text' : 'password'}
+                required
+                autoComplete="current-password"
+                className="glass-input"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isSubmitting}
+              />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                onClick={() => setShowPassword((prev) => !prev)}
+                title={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                tabIndex={-1}
+              >
+                {showPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
           </div>
 
           <button

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { BrandLogo } from "../components/BrandLogo";
+import { ThemeToggle } from "../components/ThemeToggle";
 import { TodoForm } from "../components/TodoForm";
 import { TodoList } from "../components/TodoList";
 import { useAuth } from "../hooks/useAuth";
@@ -86,6 +87,7 @@ export function TasksPage() {
       <header className="app-header glass-panel">
         <BrandLogo size="md" />
         <div className="header-actions">
+          <ThemeToggle />
           <div className="user-profile-badge">
             <span className="user-avatar-initial">
               {userDisplayName.charAt(0).toUpperCase()}
@@ -191,7 +193,11 @@ export function TasksPage() {
 
           {/* Barra de Progreso en Vivo */}
           {totalCount > 0 && (
-            <div className="task-progress-card content-progress-card">
+            <div
+              className={`task-progress-card content-progress-card ${
+                progressPercentage === 100 ? "progress-card-completed" : ""
+              }`}
+            >
               <div className="progress-info-header">
                 <div className="progress-label-wrap">
                   <span className="progress-label">Progreso general</span>
@@ -200,7 +206,14 @@ export function TasksPage() {
                     {totalCount === 1 ? "tarea" : "tareas"})
                   </span>
                 </div>
-                <span className="progress-value">{progressPercentage}%</span>
+                <div className="progress-value-wrap">
+                  {progressPercentage === 100 && (
+                    <span className="progress-celebration-badge">
+                      ¡Completado! 🎉
+                    </span>
+                  )}
+                  <span className="progress-value">{progressPercentage}%</span>
+                </div>
               </div>
               <div
                 className="progress-track"

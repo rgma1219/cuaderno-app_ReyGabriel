@@ -1,3 +1,5 @@
+import { useContext } from "react";
+import { ThemeContext } from "../features/theme/ThemeContext";
 import logoLight from "../assets/logo-light.png";
 import logoDark from "../assets/logo-dark.png";
 
@@ -18,22 +20,27 @@ export function BrandLogo({
   showText = true,
   className = "",
 }: BrandLogoProps) {
+  const themeContext = useContext(ThemeContext);
+  const resolvedTheme = themeContext?.resolvedTheme;
   const imgSize = sizePixels[size];
+
+  // Si está disponible ThemeContext, usar el logo según el tema resuelto;
+  // de lo contrario, usar logoLight por defecto.
+  const currentLogo = resolvedTheme === "dark" ? logoDark : logoLight;
 
   return (
     <div
       className={`brand-logo-container brand-logo-${size} ${className}`.trim()}
     >
-      <picture className="brand-logo-picture">
-        <source media="(prefers-color-scheme: dark)" srcSet={logoDark} />
+      <div className="brand-logo-picture">
         <img
-          src={logoLight}
+          src={currentLogo}
           alt="Cuaderno Logo"
           width={imgSize}
           height={imgSize}
           className="brand-logo-img"
         />
-      </picture>
+      </div>
 
       {showText && (
         <div className="brand-logo-text">
@@ -43,3 +50,4 @@ export function BrandLogo({
     </div>
   );
 }
+
