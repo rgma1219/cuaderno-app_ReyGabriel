@@ -1,0 +1,31 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Reglas de seguridad para la colección de tareas ('tasks')
+    match /tasks/{taskId} {
+      // Lectura: el usuario debe estar autenticado y el documento debe pertenecerle
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      
+      // Creación: el usuario debe estar autenticado y registrar su propio UID como propietario
+      allow create: if request.auth != null 
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.title is string
+                    && request.resource.data.title.size() > 0;
+      
+      // Modificación: sólo el propietario puede actualizar su tarea y no puede transferirla a otro UID
+      allow update: if request.auth != null 
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == request.auth.uid;
+      
+      // Eliminación: sólo el propietario puede eliminar su tarea
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Denegar acceso por defecto a cualquier otra colección o ruta
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
