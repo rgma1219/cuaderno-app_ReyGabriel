@@ -222,7 +222,13 @@ export default async function handler(
   }
 
   // 3. Validación de variables de entorno de AWS
-  const awsRegion = process.env.AWS_REGION || 'us-east-1';
+  // Nota: Vercel Functions inyecta automáticamente AWS_REGION='us-east-1' correspondiente al datacenter iad1.
+  // Para evitar esa colisión, soportamos AWS_SES_REGION y establecemos como región predeterminada 'us-east-2' (Ohio).
+  const awsRegion =
+    process.env.AWS_SES_REGION ||
+    (process.env.AWS_REGION && process.env.AWS_REGION !== 'us-east-1'
+      ? process.env.AWS_REGION
+      : 'us-east-2');
   const awsAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
   const awsSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
   const senderEmail = process.env.AWS_SES_SENDER_EMAIL;
