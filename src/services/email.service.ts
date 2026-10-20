@@ -50,3 +50,26 @@ export async function sendTaskSummaryEmail(
 
   return data as SendSummaryResponse;
 }
+
+/**
+ * Solicita a AWS SES registrar una dirección de correo y disparar el enlace
+ * de verificación para habilitar el envío de resúmenes en modo Sandbox.
+ */
+export async function requestEmailVerification(email: string): Promise<boolean> {
+  if (!email || !email.includes('@')) return false;
+
+  try {
+    const response = await fetch('/api/verify-identity', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email: email.trim().toLowerCase() }),
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.warn('[AWS SES Request Verification Warning]:', error);
+    return false;
+  }
+}

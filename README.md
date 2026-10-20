@@ -16,7 +16,7 @@
 
 ## 🌟 Descripción Ejecutiva
 
-**Cuaderno** es una aplicación web de gestión estratégica de tareas diseñada con un enfoque *mobile-first* y una estética contemporánea de **Liquid Glass (Glassmorphism)** inspirada en los sistemas operativos modernos de Apple. La plataforma permite a los usuarios autenticarse de manera segura, registrar y categorizar tareas en tiempo real, visualizar métricas dinámicas de productividad y despachar resúmenes ejecutivos directamente a su correo electrónico mediante una arquitectura serverless en la nube.
+**Cuaderno** es una aplicación web de gestión estratégica de tareas diseñada con un enfoque _mobile-first_ y una estética contemporánea de **Liquid Glass (Glassmorphism)** inspirada en los sistemas operativos modernos de Apple. La plataforma permite a los usuarios autenticarse de manera segura, registrar y categorizar tareas en tiempo real, visualizar métricas dinámicas de productividad y despachar resúmenes ejecutivos directamente a su correo electrónico mediante una arquitectura serverless en la nube.
 
 ---
 
@@ -31,8 +31,8 @@
 2. **Gestión de Tareas en Tiempo Real (Cloud Firestore)**:
    - Sincronización bidireccional reactiva (`onSnapshot`) sin necesidad de recargar la página.
    - Creación, edición en línea, cambio de estado (pendiente/completada) y eliminación de tareas.
-   - Pestañas de filtrado (*Todas*, *Pendientes*, *Completadas*) con contadores numéricos interactivos.
-   - Estados de carga interactivos (*skeleton shimmer*) y estados vacíos ilustrados.
+   - Pestañas de filtrado (_Todas_, _Pendientes_, _Completadas_) con contadores numéricos interactivos.
+   - Estados de carga interactivos (_skeleton shimmer_) y estados vacíos ilustrados.
 
 3. **Arquitectura Serverless y Despacho de Correos (AWS SES)**:
    - Endpoint backend `/api/send-summary` ejecutado en Vercel Functions.
@@ -54,18 +54,18 @@
 
 ## 🛠️ Stack Tecnológico
 
-| Capa | Tecnología | Justificación y Rol |
-| :--- | :--- | :--- |
-| **Frontend Framework** | **React 19** | Biblioteca declarativa de interfaz de usuario con hooks modernos. |
-| **Lenguaje** | **TypeScript 5 (Strict)** | Tipado estático riguroso (`noImplicitAny`, chequeo nulo estricto) para prevenir errores en tiempo de ejecución. |
-| **Bundler & Tooling** | **Vite 6** | Empaquetado ultrarrápido y Hot Module Replacement (HMR). |
-| **Autenticación** | **Firebase Auth** | Gestión segura de identidad de usuarios, tokens JWT y sesiones persistentes. |
-| **Base de Datos** | **Cloud Firestore** | Base de datos NoSQL documental con sincronización reactiva en tiempo real. |
-| **Backend Serverless** | **Vercel Functions** | Ejecución de funciones en el borde (*Edge/Serverless*) para aislar credenciales privadas. |
-| **Servicio de Correo** | **AWS SES (SDK v3)** | Infraestructura empresarial escalable de envío de correos electrónicos transaccionales. |
-| **Testing** | **Vitest + RTL** | Entorno de pruebas de alto rendimiento con emulación DOM (`jsdom`). |
-| **Estilos** | **Vanilla CSS** | Sistema de tokens de diseño moderno, transiciones suaves y estética *Glassmorphism*. |
-| **Hosting & CI/CD** | **Vercel** | Despliegue continuo automatizado con integración directa a GitHub. |
+| Capa                   | Tecnología                | Justificación y Rol                                                                                             |
+| :--------------------- | :------------------------ | :-------------------------------------------------------------------------------------------------------------- |
+| **Frontend Framework** | **React 19**              | Biblioteca declarativa de interfaz de usuario con hooks modernos.                                               |
+| **Lenguaje**           | **TypeScript 5 (Strict)** | Tipado estático riguroso (`noImplicitAny`, chequeo nulo estricto) para prevenir errores en tiempo de ejecución. |
+| **Bundler & Tooling**  | **Vite 6**                | Empaquetado ultrarrápido y Hot Module Replacement (HMR).                                                        |
+| **Autenticación**      | **Firebase Auth**         | Gestión segura de identidad de usuarios, tokens JWT y sesiones persistentes.                                    |
+| **Base de Datos**      | **Cloud Firestore**       | Base de datos NoSQL documental con sincronización reactiva en tiempo real.                                      |
+| **Backend Serverless** | **Vercel Functions**      | Ejecución de funciones en el borde (_Edge/Serverless_) para aislar credenciales privadas.                       |
+| **Servicio de Correo** | **AWS SES (SDK v3)**      | Infraestructura empresarial escalable de envío de correos electrónicos transaccionales.                         |
+| **Testing**            | **Vitest + RTL**          | Entorno de pruebas de alto rendimiento con emulación DOM (`jsdom`).                                             |
+| **Estilos**            | **Vanilla CSS**           | Sistema de tokens de diseño moderno, transiciones suaves y estética _Glassmorphism_.                            |
+| **Hosting & CI/CD**    | **Vercel**                | Despliegue continuo automatizado con integración directa a GitHub.                                              |
 
 ---
 
@@ -129,30 +129,38 @@ AWS_REGION=us-east-2
 AWS_SES_REGION=us-east-2
 AWS_ACCESS_KEY_ID=AKIA...
 AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCY...
-AWS_SES_SENDER_EMAIL=tu_correo_verificado@gmail.com
+AWS_SES_SENDER_EMAIL=info.cuadernoapp@gmail.com
 ```
 
-> **Nota técnica sobre AWS SES y Vercel**: Vercel asigna automáticamente la variable reservada de sistema `AWS_REGION=us-east-1` por su datacenter físico. El backend de Cuaderno implementa `AWS_SES_REGION` para desacoplar el servicio de mensajería de la infraestructura de Vercel y garantizar la conexión con la región autorizada (`us-east-2` Ohio).
+> **Nota técnica sobre AWS SES y Vercel (Modo Sandbox & Región)**:
+>
+> 1. **Aislamiento de Región**: Vercel asigna automáticamente la variable reservada de sistema `AWS_REGION=us-east-1` por su datacenter físico. El backend de Cuaderno implementa `AWS_SES_REGION` para desacoplar el servicio de mensajería y garantizar la conexión con la región autorizada (`us-east-2` Ohio).
+> 2. **Modo Sandbox**: La cuenta de AWS SES opera bajo el entorno controlado de Sandbox (sin dominio corporativo propio). En este modo, tanto el remitente (`info.cuadernoapp@gmail.com`) como los destinatarios deben ser identidades verificadas.
+> 3. **Verificación Automática al Registrarse**: Para optimizar la experiencia de usuario, la aplicación invoca automáticamente el endpoint `/api/verify-identity` al crear una cuenta o iniciar sesión. AWS SES envía de inmediato un email de confirmación al buzón del usuario; una vez confirmado el enlace, queda habilitado para recibir el resumen de sus tareas.
 
 ---
 
 ## 💻 Instalación y Ejecución Local
 
 1. **Clonar el repositorio**:
+
    ```bash
    git clone https://github.com/rgma1219/cuaderno-app_ReyGabriel.git
    cd cuaderno-app_ReyGabriel
    ```
 
 2. **Instalar dependencias**:
+
    ```bash
    npm install
    ```
 
 3. **Iniciar el servidor de desarrollo**:
+
    ```bash
    npm run dev
    ```
+
    La aplicación se abrirá en `http://localhost:5173`.
 
 4. **Compilar para producción**:
@@ -175,6 +183,7 @@ npm run test:watch
 ```
 
 ### Resumen de Pruebas:
+
 - `tests/unit/date.utils.test.ts`: Formateo de fechas relativas y manejo de marcas de tiempo nulas o inválidas (2 tests).
 - `tests/unit/auth.service.test.ts`: Mapeo exhaustivo de códigos de error de Firebase a mensajes legibles en español y formateo de sesiones (10 tests).
 - `tests/unit/email.service.test.ts`: Despacho del resumen, validación de respuestas 200, captura de fallos 500 y errores de red en el serverless (3 tests).
@@ -194,11 +203,11 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /tasks/{taskId} {
       allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-      allow create: if request.auth != null 
+      allow create: if request.auth != null
                     && request.resource.data.userId == request.auth.uid
                     && request.resource.data.title is string
                     && request.resource.data.title.size() > 0;
-      allow update: if request.auth != null 
+      allow update: if request.auth != null
                     && resource.data.userId == request.auth.uid
                     && request.resource.data.userId == request.auth.uid;
       allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
@@ -214,10 +223,10 @@ service cloud.firestore {
 
 ## 🤖 Reflexión sobre el Uso de Inteligencia Artificial
 
-Durante el desarrollo de **Cuaderno**, la Inteligencia Artificial fue utilizada de forma estratégica, metódica y reflexiva bajo el rol de **asistente de programación en pareja (*pair programming*) y mentor pedagógico**:
+Durante el desarrollo de **Cuaderno**, la Inteligencia Artificial fue utilizada de forma estratégica, metódica y reflexiva bajo el rol de **asistente de programación en pareja (_pair programming_) y mentor pedagógico**:
 
 1. **Diseño y Exploración de Identidad (Etapas 0 y 1)**:
-   - Se utilizaron modelos generativos para explorar naming, paletas cromáticas accesibles y el diseño conceptual del isotipo, seleccionando la metáfora de un cuaderno clásico fusionada con el efecto vanguardista *Liquid Glass* de Apple.
+   - Se utilizaron modelos generativos para explorar naming, paletas cromáticas accesibles y el diseño conceptual del isotipo, seleccionando la metáfora de un cuaderno clásico fusionada con el efecto vanguardista _Liquid Glass_ de Apple.
 2. **Arquitectura y Aislamiento de Capas**:
    - Se estructuró el código separando estrictamente la UI de la infraestructura mediante servicios desacoplados (`task.service.ts`, `auth.service.ts`, `email.service.ts`), asegurando que la lógica de Firebase o AWS no contaminara los componentes de React.
 3. **Resolución Crítica de Problemas en la Nube (AWS SES & Vercel)**:

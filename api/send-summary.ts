@@ -1,4 +1,4 @@
-import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
+import { SESClient, SendEmailCommand, VerifyEmailIdentityCommand } from '@aws-sdk/client-ses';
 
 export interface EmailTaskItem {
   id?: string;
@@ -284,8 +284,31 @@ export default async function handler(
       message: 'Resumen enviado exitosamente a tu correo.',
       messageId: sesResponse.MessageId,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('[AWS SES Error]:', error);
+    const err = error as { name?: string; message?: string };
+    const isUnverified =
+      err?.name === 'MessageRejected' ||
+      err?.message?.includes('Email address is not verified') ||
+      err?.message?.includes('identities failed the check');
+
+    if (isUnverified) {
+      // Disparamos preventivamente el correo de verificación de AWS SES
+      try {
+        await sesClient.send(
+          new VerifyEmailIdentityCommand({ EmailAddress: recipientEmail.trim().toLowerCase() }),
+        );
+      } catch (verifyErr) {
+        console.warn('[AWS SES Auto-Verify Warning]:', verifyErr);
+      }
+
+      return res.status(400).json({
+        success: false,
+        error:
+          'Tu correo aún no está verificado en AWS SES (modo Sandbox). Te enviamos un email de verificación desde AWS: por favor abre el enlace que recibiste en tu bandeja de entrada (o Spam) y luego vuelve a presionar "Enviar resumen".',
+      });
+    }
+
     const errorMessage =
       error instanceof Error ? error.message : 'Error desconocido al despachar correo con AWS SES.';
 

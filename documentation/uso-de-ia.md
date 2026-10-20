@@ -426,7 +426,105 @@ _Captura 8.1: Implementación del conmutador de tema (Theme Toggle), adaptación
 
 ---
 
+## 🚀 Etapa 9: Resolución de Bloqueo en AWS SES Sandbox, Verificación Automática de Identidades y Soporte API en Local
+
+### 📋 Ficha Técnica
+
+- **Fecha:** 20/10/2026
+- **Modelo:** Google Gemini 3.8 Flash / Antigravity AI
+- **Objetivo:** Diagnosticar y resolver el fallo de despacho de correos en AWS SES originado por las restricciones de aislamiento del modo Sandbox; implementar la verificación automática de identidades para nuevos usuarios al registrarse; migrar al remitente oficial `info.cuadernoapp@gmail.com` e integrar un middleware local en Vite para emular las funciones serverless sin requerir CLI externas.
+
+---
+
+### 📥 1. Prompt Inicial (Usuario)
+
+> _"Se un programador web fullstack senior._  
+> _Analiza todo el proyecto Cuaderno._  
+> _Tenemos un inconveniente con el envío por email del resumen de las tareas del usuario de la app._  
+> _Actualmente, al intentar enviar el resumen por email, la app muestra un error de AWS que es:_  
+> _'Error al enviar correo con AWS SES: Email address is not verified. The following identities failed the check in region US-EAST-2: holagabi@gmail.com'_  
+> _Busca por qué puede ser que pase este problema y cuales serían las posibles soluciones._  
+> _Aún no hagas cambios sobre el proyecto. En primera medida analicemos la cuestión y armemos el plan para la solución."_
+
+---
+
+### 📤 2. Diagnóstico e Investigación Técnica de la IA
+
+La IA inspeccionó el archivo `api/send-summary.ts`, las credenciales de entorno y la arquitectura de infraestructura, identificando la causa raíz:
+
+1. **Aislamiento en Amazon SES Sandbox:**  
+   Al operar sin dominio propio verificado por DNS (SPF/DKIM), la cuenta de AWS SES se encuentra en entorno de pruebas (*Sandbox*). En este modo, no solo el remitente (`Source`) debe estar validado, sino que **los correos destinatarios (`ToAddresses`) también deben ser identidades verificadas en la misma región (`us-east-2`)**.
+2. **Origen de la excepción:**  
+   Cuando un usuario inicia sesión con una dirección no registrada en la consola de AWS SES (ej. `holagabi@gmail.com`) e intenta despachar su resumen, el SDK de AWS rechaza la petición arrojando `MessageRejected: Email address is not verified`.
+3. **Propuesta de alternativas:**  
+   - *Opción A (Manual):* Verificar manualmente cada correo de prueba en la consola de AWS SES.
+   - *Opción B (Automática / Cátedra):* Disparar el proceso de verificación desde el backend en el momento del registro.
+   - *Opción C (Resiliencia UX):* Interceptar el error `MessageRejected` para proveer mensajes explicativos al usuario final en lugar de exponer trazas técnicas crudas de AWS.
+
+---
+
+### 🔄 3. Intercambio y Contraste Crítico con la Cátedra (Instructor y Compañero)
+
+#### Prompts del Usuario e Información Aportada
+El usuario suministró la guía oficial de la cátedra de Henry M4 (*"Enviar emails con AWS SES sin dominio propio"*) y un ejemplo de código alternativo propuesto por un compañero.
+
+#### Análisis Crítico de la IA y Decisión del Desarrollador
+- **Descarte fundado de la propuesta del compañero:**  
+  Se analizó el código alternativo y se dictaminó que no solucionaba el problema: omitía el tratamiento de `MessageRejected`, utilizaba `AWS_REGION` directamente (lo cual colisiona con el datacenter `us-east-1` inyectado por Vercel) y reemplazaba la plantilla HTML responsive con estilos Glassmorphism por un simple texto plano con emojis.
+- **Adopción de los lineamientos del Instructor (Checklist de Entrega):**  
+  Se constató que el checklist oficial exigía:
+  - Correo remitente verificado dedicado al proyecto.
+  - Verificación automática de identidades al registrarse.
+  - Captura amigable del error `MessageRejected`.
+  - Explicación del modo Sandbox en el `README.md`.
+  - Creación de una cuenta de Gmail institucional dedicada: `info.cuadernoapp@gmail.com`.
+
+---
+
+### 🛠️ 4. Soluciones Técnicas Adoptadas
+
+1. **Alta y Verificación del Remitente Oficial:**  
+   - Se registró y verificó en AWS SES (`us-east-2`) la identidad `info.cuadernoapp@gmail.com`.
+   - Se actualizaron las variables de entorno locales en `.env` y el archivo de plantilla `.env.example`.
+2. **Endpoint Serverless de Verificación Automática (`api/verify-identity.ts`):**  
+   - Creación de un endpoint dedicado que ejecuta `VerifyEmailIdentityCommand` del SDK `@aws-sdk/client-ses`.
+   - Al registrar una nueva cuenta, AWS despacha automáticamente el email de confirmación al buzón del usuario.
+3. **Integración en el Ciclo de Vida del Frontend (`AuthContext.tsx` y `email.service.ts`):**  
+   - Función `requestEmailVerification(email)` conectada de forma asíncrona no bloqueante tanto al registro tradicional (`registerWithEmail`) como al inicio con proveedor federado (`loginWithGoogle`).
+4. **Manejo Resiliente y Mecanismo de Autocuración (`api/send-summary.ts`):**  
+   - Se interceptó el error `MessageRejected` (o cualquier mensaje con `Email address is not verified`).
+   - Si un usuario presiona *"Enviar resumen"* antes de verificar su bandeja, el backend le dispara preventivamente la solicitud de verificación y le informa de manera amigable que debe abrir el enlace de confirmación recibido en su correo (o carpeta Spam).
+5. **Soporte Nativo de APIs en Servidor de Desarrollo (`vite.config.ts` y `vercel.json`):**  
+   - Se detectó que `npx vercel dev` entraba en conflicto con los módulos virtuales de Vite debido a una regla de reescritura excesivamente amplia en `vercel.json`.
+   - Se corrigió `vercel.json` restringiendo la regla a rutas que no contengan extensiones de archivo: `/((?!api/|.*\\..*).*)`.
+   - Se implementó un middleware liviano en `vite.config.ts` (`localApiPlugin`) mediante `server.middlewares`, permitiendo que `npm run dev` atienda las llamadas `/api/send-summary` y `/api/verify-identity` de forma directa, eliminando la necesidad de dependencias o CLI externas para pruebas locales.
+6. **Validación de la Suite de Pruebas Automatizadas:**  
+   - Se expandió `tests/unit/email.service.test.ts` con 3 tests unitarios adicionales cubriendo los flujos exitosos y de error de red de `requestEmailVerification`.
+   - **Resultado:** 32 de 32 tests unitarios y de integración pasando al 100%.
+
+---
+
+### 📸 5. Evidencias Visuales (Capturas de Pantalla)
+
+<!-- Captura de AWS SES con las identidades verificadas en us-east-2 -->
+
+![Identidades Verificadas en AWS SES](./capturas/etapa-09-aws-ses-identities.png)  
+_Captura 9.1: Consola de AWS SES en Ohio (us-east-2) mostrando las identidades en estado «Verificado» para el remitente oficial info.cuadernoapp@gmail.com._
+
+---
+
+### 📌 6. Conclusiones y Decisiones Tomadas
+
+- [x] **Flujo de correo 100% operativo en Sandbox:** Solución alineada con los requisitos de la rúbrica y checklist de entrega de Henry M4.
+- [x] **Remitente corporativo:** Sustitución de correos personales por `info.cuadernoapp@gmail.com`.
+- [x] **Verificación automática transparente:** Envío proactivo de la invitación de SES al crearse usuarios en Firebase Auth.
+- [x] **Excelente DX local:** Capacidad de ejecutar frontend y backend serverless simultáneamente con un único comando (`npm run dev`).
+- [x] **Documentación completa:** Actualización del `README.md` detallando las consideraciones de infraestructura en la nube.
+
+---
+
 ## 📋 Plantilla Reutilizable para Nuevas Consultas
+
 
 > 💡 _Puedes copiar y pegar este bloque al final de este documento tantas veces como necesites para registrar consultas adicionales o temas específicos._
 

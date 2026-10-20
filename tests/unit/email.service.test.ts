@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { sendTaskSummaryEmail } from '../../src/services/email.service';
+import { sendTaskSummaryEmail, requestEmailVerification } from '../../src/services/email.service';
 import type { Task } from '../../src/types/task.types';
 
 const mockTasks: Task[] = [
@@ -93,5 +93,47 @@ describe('Servicio de Email: sendTaskSummaryEmail (Casos Borde y Serverless)', (
         tasks: mockTasks,
       }),
     ).rejects.toThrow('Error del servidor al despachar el correo (Código HTTP 502).');
+  });
+
+  describe('Verificación de Identidad: requestEmailVerification', () => {
+    it('debe despachar la petición a /api/verify-identity con el correo formateado y retornar true en caso exitoso', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ success: true }),
+      });
+
+      vi.stubGlobal('fetch', mockFetch);
+
+      const result = await requestEmailVerification('User@Example.COM');
+
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/api/verify-identity',
+        expect.objectContaining({
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: 'user@example.com' }),
+        }),
+      );
+      expect(result).toBe(true);
+    });
+
+    it('debe retornar false directamente si el email es inválido sin invocar fetch', async () => {
+      const mockFetch = vi.fn();
+      vi.stubGlobal('fetch', mockFetch);
+
+      const result = await requestEmailVerification('');
+      expect(result).toBe(false);
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('debe capturar errores de red sin propagar excepción y retornar false', async () => {
+      const mockFetch = vi.fn().mockRejectedValue(new Error('Network Failure'));
+      vi.stubGlobal('fetch', mockFetch);
+
+      const result = await requestEmailVerification('test@example.com');
+      expect(result).toBe(false);
+    });
   });
 });

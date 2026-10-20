@@ -17,6 +17,7 @@ import {
   logoutUser,
   subscribeToAuthChanges,
 } from '../../services/auth.service';
+import { requestEmailVerification } from '../../services/email.service';
 
 /**
  * Contrato de los valores y funciones expuestos por el contexto de autenticación.
@@ -61,12 +62,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const register = async (credentials: RegisterCredentials): Promise<UserSession> => {
     const registeredUser = await registerWithEmail(credentials);
     setUser(registeredUser);
+    if (registeredUser.email) {
+      requestEmailVerification(registeredUser.email).catch(() => {});
+    }
     return registeredUser;
   };
 
   const loginWithGoogle = async (): Promise<UserSession> => {
     const googleUser = await loginWithGoogleService();
     setUser(googleUser);
+    if (googleUser.email) {
+      requestEmailVerification(googleUser.email).catch(() => {});
+    }
     return googleUser;
   };
 
