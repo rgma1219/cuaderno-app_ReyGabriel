@@ -305,16 +305,16 @@ export default async function handler(
       return res.status(400).json({
         success: false,
         error:
-          'Tu correo aún no está verificado en AWS SES (modo Sandbox). Te enviamos un email de verificación desde AWS: por favor abre el enlace que recibiste en tu bandeja de entrada (o Spam) y luego vuelve a presionar "Enviar resumen".',
+          'Tu correo aún no ha sido confirmado. Te enviamos un enlace de validación a tu bandeja de entrada (o Spam): por favor confírmalo y luego vuelve a presionar "Enviar resumen".',
       });
     }
 
     const errorMessage =
-      error instanceof Error ? error.message : 'Error desconocido al despachar correo con AWS SES.';
+      error instanceof Error ? error.message : 'Error desconocido al despachar el correo.';
 
     return res.status(500).json({
       success: false,
-      error: `Error al enviar correo con AWS SES: ${errorMessage}`,
+      error: `Error al enviar correo: ${errorMessage}`,
     });
   }
 }

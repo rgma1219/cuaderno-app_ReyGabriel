@@ -95,16 +95,16 @@ export default async function handler(
 
     return res.status(200).json({
       success: true,
-      message: 'Solicitud de verificación enviada por AWS SES. Revisa tu bandeja de entrada o spam.',
+      message: 'Solicitud de verificación enviada con éxito. Revisa tu bandeja de entrada o spam.',
     });
   } catch (error) {
     console.error('[AWS SES Verify Identity Error]:', error);
     const errorMessage =
-      error instanceof Error ? error.message : 'Error al registrar la identidad en AWS SES.';
+      error instanceof Error ? error.message : 'Error al registrar la validación del correo.';
 
     return res.status(500).json({
       success: false,
-      error: `Error al registrar identidad en AWS SES: ${errorMessage}`,
+      error: `Error al procesar la verificación del correo: ${errorMessage}`,
     });
   }
 }
