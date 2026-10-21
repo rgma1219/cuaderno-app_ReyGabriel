@@ -76,9 +76,8 @@ El código fuente sigue una arquitectura por capas modular y predecible:
 ```text
 cuaderno-app/
 ├── api/
-│   └── send-summary.ts          # Serverless Function de Vercel (despacho AWS SES)
-├── functions/
-│   └── send-summary.ts          # Reexportación del handler serverless
+│   ├── send-summary.ts          # Serverless Function de Vercel (despacho AWS SES)
+│   └── verify-identity.ts       # Verificación automática de identidades en AWS SES Sandbox
 ├── public/                      # Activos públicos estáticos
 ├── src/
 │   ├── assets/                  # Isotipos y logotipos oficiales de Cuaderno
