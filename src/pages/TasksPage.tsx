@@ -99,7 +99,7 @@ export function TasksPage() {
             onClick={handleLogout}
             className="glass-button glass-button-secondary header-logout-btn"
           >
-            Cerrar sesión
+            Salir
           </button>
         </div>
       </header>

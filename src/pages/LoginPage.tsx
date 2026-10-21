@@ -126,7 +126,7 @@ export function LoginPage() {
             className="glass-button glass-button-primary w-full"
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+            {isSubmitting ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
 

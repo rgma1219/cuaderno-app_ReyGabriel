@@ -17,6 +17,8 @@
 - [Etapa 6: Testing Automatizado con Vitest y React Testing Library](#-etapa-6-testing-automatizado-con-vitest-y-react-testing-library)
 - [Etapa 7: Seguridad, Despliegue en Vercel y Resolución de Conflictos Cloud](#-etapa-7-seguridad-despliegue-en-vercel-y-resolución-de-conflictos-cloud)
 - [Etapa 8: Auditoría UX/UI, Refactorización de Estilos y Sistema de Cambio de Tema (Light/Dark)](#-etapa-8-auditoría-uxui-refactorización-de-estilos-y-sistema-de-cambio-de-tema-lightdark)
+- [Etapa 9: Resolución de Bloqueo en AWS SES Sandbox, Verificación Automática de Identidades y Soporte API en Local](#-etapa-9-resolución-de-bloqueo-en-aws-ses-sandbox-verificación-automática-de-identidades-y-soporte-api-en-local)
+- [Etapa 10: Refactorización Mobile-First de la Interfaz, Resolución de Desbordamientos en Dispositivos Móviles y Estandarización de Tokens CSS](#-etapa-10-refactorización-mobile-first-de-la-interfaz-resolución-de-desbordamientos-en-dispositivos-móviles-y-estandarización-de-tokens-css)
 - [📋 Plantilla Reutilizable para Nuevas Interacciones](#-plantilla-reutilizable-para-nuevas-consultas)
 - [Guía para adjuntar capturas de pantalla](#-guía-para-adjuntar-capturas-de-pantalla)
 
@@ -520,6 +522,83 @@ _Captura 9.1: Consola de AWS SES en Ohio (us-east-2) mostrando las identidades e
 - [x] **Verificación automática transparente:** Envío proactivo de la invitación de SES al crearse usuarios en Firebase Auth.
 - [x] **Excelente DX local:** Capacidad de ejecutar frontend y backend serverless simultáneamente con un único comando (`npm run dev`).
 - [x] **Documentación completa:** Actualización del `README.md` detallando las consideraciones de infraestructura en la nube.
+
+---
+
+## 🚀 Etapa 10: Refactorización Mobile-First de la Interfaz, Resolución de Desbordamientos en Dispositivos Móviles y Estandarización de Tokens CSS
+
+### 📋 Ficha Técnica
+
+- **Fecha:** 21/10/2026
+- **Modelo:** Google Gemini 3.8 Flash / Antigravity AI
+- **Objetivo:** Diagnosticar y resolver de raíz los problemas de desbordamiento horizontal y asimetría lateral en pantallas móviles estrechas (Samsung Galaxy S25+, Galaxy A55 360px, iPhone SE 375px, iPhone 16 393px); reestructurar la totalidad de `App.css` bajo el paradigma Mobile-First; modernizar `index.css` eliminando valores hardcodeados con nuevos tokens de diseño (`100dvh`, sombras dinámicas, `--focus-ring`); resolver el truncamiento visual de la barra de filtros en anchos menores a 410px; y actualizar los textos de los botones principales a "Entrar" y "Salir".
+
+---
+
+### 📥 1. Prompts del Usuario e Hitos de la Interacción
+
+1. **Consulta inicial de responsividad (Samsung Galaxy S25+):**  
+   > _"Se un programador web fullstack experto en diseño de ux/ui y desarrollo frontend. Verifica las reglas CSS porque la interfaz se rompe en pantallas poco anchas en mobile. Tengo un Samsung S25 Plus que tiene buena resolución y no se ve bien. Da un informe detallado de lo que está pasando y una propuesta de solución integral."_
+2. **Ajuste de textos de acción:**  
+   > _"Aplica las correcciones necesarias sin cambiar demasiado la IU. También me gustaría que cambies los textos de los botón de iniciar sesión por Entrar y el de cerrar sesión por Salir..."_
+3. **Detección de corte lateral y requerimiento Mobile-First:**  
+   > _"Analiza estas capturas de pantalla. Veras en la parte superior la simulación del dispositivo y los tamaños de ancho y alto. Siento que algo sigue fallando. Verás en la captura del Galaxy A55 y del Iphone 16, se rompe los contenedores en el lado derecho. Por otro lado, no me gusta como está organizado el archivo App.css... quiero que lo estructures de tal manera que respete el paradigma mobile-first y luego abajo esten los cambios para desktop. Explicame el plan y lo analizo. Aún no modifiques código."_
+4. **Incorporación de `index.css` y eliminación de valores hardcodeados:**  
+   > _"El plan me parece perfecto. Quiero que agregues el análisis al archivo index.css para que siga la misma estructura de ser necesario. Aprovecha para controlar que se usen variables root que están declaradas y no se hardcodee nada. Que las reglas CSS sigan el mejor estandar y mas actualizado. Antes de tocar código, agrega al analisis el archivo index.css"_
+5. **Detección de truncamiento en filtros y confirmación final:**  
+   > _"Quedó todo bien en líneas generales... lo único es que quedó roto los filtros de las tareas. Recién cuando supera 410 de ancho, el filtro queda con los tres sin recortar. Antes, el filtro de 'Completadas', queda recortado."_
+
+---
+
+### 📤 2. Diagnóstico Técnico de la IA
+
+1. **Resolución física vs. Viewport CSS (DPR):**  
+   Se clarificó el mito de la "alta resolución": pantallas como la del Galaxy S25+ (3120x1440) no renderizan 1:1 en web, sino que aplican un Device Pixel Ratio (DPR) de ~2.6 a ~3.5, generando un viewport CSS de **384px a 412px** (o ~360px con zoom de pantalla activado en One UI).
+2. **Causa raíz del corte lateral derecho (`min-width: auto` en Grid):**  
+   `.app-split-layout` operaba como CSS Grid sin `min-width: 0`. Cuando un hijo poseía un ancho intrínseco superior al viewport, el grid expandía el contenedor más allá del 100%. Dado que el `body` tenía `overflow-x: hidden`, el navegador recortaba silenciosamente el lado derecho, mutilando el margen, el radio de borde y la sombra difusa Glassmorphism.
+3. **Padding Stacking:**  
+   La acumulación de paddings del shell (32px) y de los paneles (48px) consumía 80px horizontales, dejando apenas ~280px útiles para componentes en pantallas pequeñas.
+4. **Valores Hardcodeados en `index.css` y `App.css`:**  
+   Existían colores `#fff`, sombras RGBA fijas (`rgba(37, 99, 235, ...)`), bordes verdes estáticos y sombras que no se adaptaban al conmutar entre modo claro y oscuro.
+5. **Causa del recorte de la pestaña "Completadas":**  
+   Los botones con padding fijo y `white-space: nowrap` sumaban 365px mínimos. En dispositivos de 360px (espacio útil interno ~304px), la tercera pestaña quedaba desplazada 61px fuera de la vista.
+
+---
+
+### 🛠️ 3. Soluciones Técnicas Adoptadas
+
+1. **Actualización de Textos de Botones (`LoginPage.tsx` y `TasksPage.tsx`):**  
+   - *"Iniciar Sesión"* → **"Entrar"** (y *"Entrando..."* durante la carga).
+   - *"Cerrar sesión"* → **"Salir"** (reducción de 13 a 5 caracteres con `white-space: nowrap;`, impidiendo que el botón se parta en dos renglones).
+2. **Modernización y Nuevos Tokens en `src/index.css`:**  
+   - Incorporación de altura dinámica para navegadores móviles modernos: **`100dvh`**.
+   - Control anti-reescalado indeseado: `-webkit-text-size-adjust: 100%; text-size-adjust: 100%;`.
+   - Optimización táctil: `touch-action: manipulation;` para eliminar la latencia de 300ms al pulsar.
+   - Centralización de variables: `--focus-ring`, `--glass-card-shadow`, `--accent-primary-shadow`, `--accent-primary-shadow-hover`, `--theme-icon-sun`, `--theme-icon-moon` y `--accent-success-border`.
+3. **Reescritura Arquitectónica Mobile-First de `src/App.css`:**  
+   - **Sección 1 (Base Mobile por defecto, 320px - 640px):**
+     - `.app-shell` con padding simétrico de `12px` (`0.75rem`), protegiendo las sombras difusas Glassmorphism de recortes.
+     - `.app-split-layout` blindado con **`grid-template-columns: minmax(0, 1fr);`** para evitar desbordamientos matemáticamente.
+     - Header móvil en 2 filas balanceadas: Logo arriba y barra simétrica abajo (ThemeToggle + Badge elipsado + botón Salir).
+     - Tarjetas de tareas con diseño vertical: contenido flexible (`flex: 1 1 auto;`) y barra inferior con `justify-content: space-between`.
+   - **Sección 2 (Tablet `@media (min-width: 641px)`):**  
+     - Header horizontal en 1 fila, acciones en fila y paneles con padding ampliado (`1.25rem`).
+   - **Sección 3 (Desktop `@media (min-width: 860px)`):**  
+     - Grid en 2 columnas (`360px minmax(0, 1fr)`), contenedor centrado a `max-width: 1100px`, panel de creación siempre expandido y tarjetas en línea horizontal continua.
+4. **Segmented Control Responsivo para Pestañas de Filtro:**  
+   - Se transformó `.tasks-filter-tabs` en mobile a un grid de 3 columnas proporcionales: `display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.35rem;`.
+   - Se implementó tipografía fluida con `font-size: clamp(0.68rem, 2.6vw, 0.82rem);` y ligero tracking negativo (`letter-spacing: -0.015em;`), garantizando que **"Todas"**, **"Pendientes"** y **"Completadas"** entren completas y 100% legibles incluso en anchos estrechos de 360px.
+   - En pantallas mayores (`min-width: 641px`), vuelve a desplegarse en formato flex tradicional con espaciado de escritorio.
+
+---
+
+### 📌 4. Conclusiones y Decisiones Tomadas
+
+- [x] **Arquitectura CSS Mobile-First estricta:** Eliminación total de parches y sobreescrituras desordenadas; el código escala de forma ascendente y predecible.
+- [x] **Cero desbordamientos en dispositivos móviles:** Verificación visual exitosa en Galaxy A55 (360px), iPhone SE (375px), iPhone 16 (393px) e iPhone 16 Pro Max (440px).
+- [x] **Consistencia de Design System:** Eliminación de valores hardcodeados en favor de tokens dinámicos en `:root` y `[data-theme]`.
+- [x] **Filtros 100% visibles y táctiles:** Pestañas de estado adaptativas sin truncamientos en pantallas menores a 410px.
+- [x] **Micro-copy optimizado:** Textos "Entrar" y "Salir" más directos, concisos y ergonómicos para la interfaz.
 
 ---
 

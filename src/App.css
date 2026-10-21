@@ -1,73 +1,114 @@
 /* ==========================================================================
-    Contenedor Principal y Layout Base
+   APP.CSS — ARQUITECTURA MOBILE-FIRST
+   
+   Estructura:
+   1. ESTILOS BASE MOBILE (Por defecto: 320px a 640px)
+      1.1 Layout Shell y Grid Protector
+      1.2 Barra Superior (Header) y Perfil de Usuario
+      1.3 Logo de Marca (BrandLogo)
+      1.4 Panel de Crear Tarea (Sidebar) y Formulario
+      1.5 Panel Principal de Tareas y Filtros
+      1.6 Tarjeta de Tarea Individual (TodoItem)
+      1.7 Vistas de Autenticación (Login / Register)
+      1.8 Estados (Empty State, Skeletons, Alertas)
+      1.9 Controles Auxiliares (ThemeToggle, PasswordToggle)
+   2. BREAKPOINT TABLET / PANTALLAS MEDIAS (@media (min-width: 641px))
+   3. BREAKPOINT DESKTOP / PANTALLAS ANCHAS (@media (min-width: 860px))
    ========================================================================== */
+
+/* ==========================================================================
+   1. ESTILOS BASE MOBILE (Por defecto para Smartphones)
+   ========================================================================== */
+
+/* 1.1 Layout Shell y Grid Protector */
 .app-shell {
-  max-width: 1100px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
   min-height: 100vh;
-  padding: 1.5rem 1rem 3rem 1rem;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 1rem 0.75rem 2.5rem 0.75rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
+  box-sizing: border-box;
 }
 
-/* Barra superior Glassmorphism */
-.app-header {
-  padding: 0.85rem 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+/* El uso de minmax(0, 1fr) impide matemáticamente que los hijos desborden el grid */
+.app-split-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
-  flex-wrap: wrap;
+  width: 100%;
+  align-items: start;
+}
+
+/* 1.2 Barra Superior (Header) y Perfil de Usuario */
+.app-header {
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-}
-
-.header-logout-btn {
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
 }
 
 .user-profile-badge {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
   background: var(--glass-bg-subtle);
   border: 1px solid var(--glass-border-subtle);
-  padding: 0.35rem 0.75rem;
+  padding: 0.3rem 0.6rem;
   border-radius: var(--radius-full);
+  flex: 1;
+  min-width: 0;
 }
 
 .user-avatar-initial {
   width: 24px;
   height: 24px;
+  min-width: 24px;
   border-radius: 50%;
   background: var(--accent-primary);
-  color: #fff;
+  color: var(--accent-primary-fg);
   font-size: 0.75rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .user-email-text {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 500;
   color: var(--text-primary);
-  max-width: 180px;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* ==========================================================================
-    Componente BrandLogo
-   ========================================================================== */
+.header-logout-btn {
+  padding: 0.45rem 0.8rem;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* 1.3 Logo de Marca (BrandLogo) */
 .brand-logo-container {
   display: inline-flex;
   align-items: center;
@@ -123,24 +164,522 @@
   font-size: 0.85rem;
 }
 
-/* ==========================================================================
-    Vistas de Autenticación (Login / Register)
-   ========================================================================== */
-.auth-page-container {
-  min-height: 100vh;
+/* 1.4 Panel de Crear Tarea (Sidebar) y Formulario */
+.sidebar-panel {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.panel-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-form-toggle-btn {
+  display: inline-flex;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.sidebar-collapsible {
+  display: none;
+  flex-direction: column;
+  gap: 1rem;
+  animation: fadeIn 0.22s ease-in-out;
+}
+
+.sidebar-collapsible.is-open {
+  display: flex;
+}
+
+.task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.form-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.char-counter {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.form-hint-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+/* 1.5 Panel Principal de Tareas y Filtros */
+.content-panel {
+  padding: 1rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.content-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.85rem;
+  width: 100%;
+  min-width: 0;
+  border-bottom: 1px solid var(--glass-border-subtle);
+  padding-bottom: 1rem;
+}
+
+.content-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.content-header-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.current-date-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--glass-bg-subtle);
+  border: 1px solid var(--glass-border-subtle);
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  width: 100%;
+  text-align: center;
+}
+
+.date-badge-icon {
+  font-size: 0.9rem;
+}
+
+.header-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  width: 100%;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.header-action-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.action-btn-spinner {
+  width: 13px;
+  height: 13px;
+  border: 2px solid var(--glass-border-subtle);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Barra de Progreso */
+.task-progress-card,
+.content-progress-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: var(--glass-bg-subtle);
+  border: 1px solid var(--glass-border-subtle);
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-md);
+  width: 100%;
+}
+
+.progress-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.progress-label-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.progress-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.progress-value-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.progress-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+}
+
+.progress-track {
+  width: 100%;
+  height: 7px;
+  background: var(--glass-border-subtle);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--accent-primary) 0%,
+    var(--accent-success) 100%
+  );
+  border-radius: var(--radius-full);
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progress-celebration-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent-success);
+  background: var(--accent-success-bg);
+  border: 1px solid var(--accent-success);
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-full);
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+.progress-card-completed {
+  border-color: var(--accent-success-border);
+  box-shadow: var(--accent-success-shadow);
+}
+
+.progress-subtext {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Filtros por Pestañas */
+.tasks-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.tasks-filter-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.filter-tab-btn {
+  background: var(--glass-bg-subtle);
+  border: 1px solid var(--glass-border-subtle);
+  color: var(--text-secondary);
+  font-family: var(--font-family);
+  font-size: clamp(0.68rem, 2.6vw, 0.82rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  padding: 0.45rem 0.2rem;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  white-space: nowrap;
+  width: 100%;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+
+.filter-tab-btn:hover {
+  background: var(--glass-bg);
+  color: var(--text-primary);
+  border-color: var(--glass-border);
+}
+
+.filter-tab-btn.is-active {
+  background: var(--accent-primary);
+  color: var(--accent-primary-fg);
+  border-color: var(--accent-primary);
+  box-shadow: var(--accent-primary-shadow);
+}
+
+.tasks-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+  min-width: 0;
+}
+
+/* 1.6 Tarjeta de Tarea Individual (TodoItem) */
+.task-card {
+  padding: 0.85rem 1rem;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
+.task-card-completed {
+  opacity: 0.72;
+}
+
+.task-card-editing {
+  display: block;
+  border-color: var(--accent-primary);
+  box-shadow: var(--accent-primary-shadow);
+}
+
+.task-main-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  width: 100%;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.task-checkbox-btn {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--text-muted);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-top: 0.15rem;
+  position: relative;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.task-checkbox-btn::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+}
+
+.task-checkbox-btn:hover {
+  border-color: var(--accent-primary);
+  transform: scale(1.08);
+}
+
+.task-checkbox-btn.is-checked {
+  background: var(--accent-success);
+  border-color: var(--accent-success);
+}
+
+.checkmark-icon {
+  color: var(--accent-primary-fg);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.task-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.task-title {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.35;
+  word-break: break-word;
+  transition: color var(--transition-fast);
+}
+
+.task-title-completed {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.task-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.task-footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-width: 0;
+  border-top: 1px solid var(--glass-border-subtle);
+  padding-top: 0.65rem;
+  margin-top: 0.15rem;
+  gap: 0.5rem;
+}
+
+.task-buttons-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.task-action-btn {
+  background: var(--glass-bg-subtle);
+  border: 1px solid var(--glass-border-subtle);
+  padding: 0.35rem 0.55rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.task-action-btn:hover {
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+  transform: translateY(-1px);
+}
+
+.task-action-btn-danger:hover {
+  background: var(--accent-danger-bg);
+  border-color: var(--accent-danger);
+}
+
+.task-delete-confirm-box {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--glass-bg);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent-danger);
+}
+
+.confirm-delete-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-danger);
+}
+
+.task-btn-danger-confirm {
+  background: var(--accent-danger);
+  color: var(--accent-primary-fg);
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.task-btn-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+/* Edición en Línea */
+.task-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.task-edit-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.task-edit-actions .task-btn-sm {
+  flex: 1;
+}
+
+/* 1.7 Vistas de Autenticación (Login / Register) */
+.auth-page-container {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
 }
 
 .auth-card {
   width: 100%;
   max-width: 440px;
-  padding: 2.25rem 2rem;
+  padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 .auth-header {
@@ -217,26 +756,27 @@
   opacity: 0.85;
 }
 
-/* Alertas de Error y Feedback */
+/* 1.8 Estados (Empty State, Skeletons, Alertas) */
 .glass-alert {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.85rem 1rem;
+  padding: 0.75rem 0.85rem;
   border-radius: var(--radius-sm);
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   line-height: 1.4;
+  width: 100%;
 }
 
 .glass-alert-error {
   background: var(--accent-danger-bg);
-  border: 1px solid var(--accent-danger);
+  border: 1px solid var(--accent-danger-border);
   color: var(--accent-danger);
 }
 
 .glass-alert-success {
   background: var(--accent-success-bg);
-  border: 1px solid var(--accent-success);
+  border: 1px solid var(--accent-success-border);
   color: var(--accent-success);
 }
 
@@ -245,9 +785,9 @@
   flex-shrink: 0;
 }
 
-/* Pantalla de Carga de Autenticación (Loading Screen) */
 .auth-loading-container {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -277,518 +817,31 @@
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .auth-loading-text {
   font-size: 0.95rem;
   font-weight: 500;
   color: var(--text-secondary);
 }
 
-/* ==========================================================================
-    Dashboard de Tareas (Layout Dividido)
-   ========================================================================== */
-.app-split-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  align-items: start;
-}
-
-.sidebar-panel {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.mobile-form-toggle-btn {
-  display: inline-flex;
-  padding: 0.35rem 0.75rem;
-  font-size: 0.8rem;
-  border-radius: var(--radius-sm);
-}
-
-.sidebar-collapsible {
-  display: none;
-  flex-direction: column;
-  gap: 1.25rem;
-  animation: fadeIn 0.22s ease-in-out;
-}
-
-.sidebar-collapsible.is-open {
-  display: flex;
-}
-
-@media (min-width: 860px) {
-  .app-split-layout {
-    grid-template-columns: 360px 1fr;
-  }
-
-  .mobile-form-toggle-btn {
-    display: none;
-  }
-
-  .sidebar-collapsible {
-    display: flex;
-  }
-}
-
-.panel-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.task-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.form-label-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.char-counter {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.form-label {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.task-progress-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  background: var(--glass-bg-subtle);
-  border: 1px solid var(--glass-border-subtle);
-  padding: 0.85rem 1rem;
-  border-radius: var(--radius-md);
-}
-
-.progress-info-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.progress-label {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.progress-value {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--accent-primary);
-}
-
-.progress-track {
-  width: 100%;
-  height: 7px;
-  background: var(--glass-border-subtle);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent-primary) 0%, var(--accent-success) 100%);
-  border-radius: var(--radius-full);
-  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.progress-subtext {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.notification-section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.form-hint-text {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  line-height: 1.35;
-}
-
-.content-panel {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.content-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  border-bottom: 1px solid var(--glass-border-subtle);
-  padding-bottom: 1rem;
-}
-
-.content-header-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.content-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  flex-wrap: wrap;
-}
-
-.header-action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.4rem 0.85rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-  transition: all var(--transition-fast);
-}
-
-.header-action-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-}
-
-.action-btn-spinner {
-  width: 13px;
-  height: 13px;
-  border: 2px solid var(--glass-border-subtle);
-  border-top-color: var(--accent-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-.content-progress-card {
-  background: var(--glass-bg-subtle);
-  border: 1px solid var(--glass-border-subtle);
-  padding: 0.85rem 1.15rem;
-  border-radius: var(--radius-md);
-}
-
-.progress-label-wrap {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-
-.progress-value-wrap {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-}
-
-.progress-celebration-badge {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--accent-success);
-  background: var(--accent-success-bg);
-  border: 1px solid var(--accent-success);
-  padding: 0.15rem 0.55rem;
-  border-radius: var(--radius-full);
-  animation: fadeIn 0.25s ease-in-out;
-}
-
-.progress-card-completed {
-  border-color: rgba(5, 150, 105, 0.4);
-  box-shadow: 0 4px 18px rgba(5, 150, 105, 0.1);
-}
-
-
-.current-date-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: var(--glass-bg-subtle);
-  border: 1px solid var(--glass-border-subtle);
-  padding: 0.4rem 0.85rem;
-  border-radius: var(--radius-full);
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-.date-badge-icon {
-  font-size: 0.9rem;
-}
-
-@media (max-width: 640px) {
-  .content-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.85rem;
-  }
-
-  .content-header-actions {
-    width: 100%;
-    justify-content: flex-start;
-  }
-}
-
-/* ==========================================================================
-   Listado de Tareas y Filtros (TodoList & TodoItem)
-   ========================================================================== */
-.tasks-list-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.tasks-filter-tabs {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  overflow-x: auto;
-  padding-bottom: 0.25rem;
-}
-
-.filter-tab-btn {
-  background: var(--glass-bg-subtle);
-  border: 1px solid var(--glass-border-subtle);
-  color: var(--text-secondary);
-  font-family: var(--font-family);
-  font-size: 0.82rem;
-  font-weight: 600;
-  padding: 0.4rem 0.85rem;
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all var(--transition-fast);
-}
-
-.filter-tab-btn:hover {
-  background: var(--glass-bg);
-  color: var(--text-primary);
-  border-color: var(--glass-border);
-}
-
-.filter-tab-btn.is-active {
-  background: var(--accent-primary);
-  color: #ffffff;
-  border-color: var(--accent-primary);
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
-}
-
-.tasks-list-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-}
-
-/* Tarjeta de Tarea Individual (TodoItem) */
-.task-card {
-  padding: 1rem 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.task-card-completed {
-  opacity: 0.72;
-}
-
-.task-card-editing {
-  display: block;
-  border-color: var(--accent-primary);
-  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.12);
-}
-
-.task-main-content {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.85rem;
-  flex: 1 1 240px;
-}
-
-.task-checkbox-btn {
-  width: 22px;
-  height: 22px;
-  min-width: 22px;
-  border-radius: 50%;
-  border: 2px solid var(--text-muted);
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  margin-top: 0.15rem;
-  position: relative;
-  transition: all var(--transition-fast);
-}
-
-/* Área táctil extendida (WCAG Target Size) sin alterar el tamaño visual */
-.task-checkbox-btn::after {
-  content: '';
-  position: absolute;
-  top: -8px;
-  left: -8px;
-  right: -8px;
-  bottom: -8px;
-}
-
-.task-checkbox-btn:hover {
-  border-color: var(--accent-primary);
-  transform: scale(1.08);
-}
-
-.task-checkbox-btn.is-checked {
-  background: var(--accent-success);
-  border-color: var(--accent-success);
-}
-
-.checkmark-icon {
-  color: #ffffff;
-  font-size: 0.75rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.task-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  flex: 1;
-}
-
-.task-title {
-  font-size: 0.98rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  line-height: 1.35;
-  transition: color var(--transition-fast);
-}
-
-.task-title-completed {
-  text-decoration: line-through;
-  color: var(--text-muted);
-}
-
-.task-desc {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  line-height: 1.4;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.task-footer-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.task-buttons-group {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.task-action-btn {
-  background: var(--glass-bg-subtle);
-  border: 1px solid var(--glass-border-subtle);
-  padding: 0.35rem 0.55rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.task-action-btn:hover {
-  background: var(--glass-bg);
-  border-color: var(--glass-border);
-  transform: translateY(-1px);
-}
-
-.task-action-btn-danger:hover {
-  background: var(--accent-danger-bg);
-  border-color: var(--accent-danger);
-}
-
-.task-delete-confirm-box {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: var(--glass-bg);
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--accent-danger);
-}
-
-.confirm-delete-text {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--accent-danger);
-}
-
-.task-btn-danger-confirm {
-  background: var(--accent-danger);
-  color: #ffffff;
-  padding: 0.25rem 0.6rem;
-  font-size: 0.75rem;
-  border-radius: var(--radius-sm);
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.task-btn-sm {
-  padding: 0.35rem 0.75rem;
-  font-size: 0.8rem;
-}
-
-/* Formulario de Edición en Línea */
-.task-edit-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  width: 100%;
-}
-
-.task-edit-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin-top: 0.25rem;
-}
-
-/* Estado Vacío (Empty State) */
 .tasks-empty-state {
   text-align: center;
-  padding: 3rem 1.5rem;
+  padding: 2.5rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.6rem;
+  width: 100%;
 }
 
 .empty-state-icon {
@@ -809,7 +862,6 @@
   line-height: 1.5;
 }
 
-/* Skeleton Loader Shimmer */
 .task-skeleton-card {
   display: flex;
   align-items: center;
@@ -841,19 +893,24 @@
 .skeleton-line-title {
   width: 55%;
 }
-
 .skeleton-line-desc {
   width: 35%;
   height: 10px;
 }
 
 @keyframes pulse-shimmer {
-  0% { opacity: 0.5; }
-  50% { opacity: 0.9; }
-  100% { opacity: 0.5; }
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0.5;
+  }
 }
 
-/* Utilidades generales */
+/* 1.9 Controles Auxiliares */
 .badge-pending {
   background: var(--accent-primary);
   color: var(--accent-primary-fg);
@@ -873,9 +930,6 @@
   width: 100%;
 }
 
-/* ==========================================================================
-   Botón ThemeToggle y Animaciones
-   ========================================================================== */
 .theme-toggle-btn {
   padding: 0.5rem;
   width: 38px;
@@ -890,6 +944,7 @@
   position: relative;
   overflow: hidden;
   transition: all var(--transition-fast);
+  flex-shrink: 0;
 }
 
 .theme-toggle-btn:hover {
@@ -912,20 +967,13 @@
 }
 
 .sun-icon {
-  color: #f59e0b;
+  color: var(--theme-icon-sun);
 }
 
 .moon-icon {
-  color: #818cf8;
+  color: var(--theme-icon-moon);
 }
 
-.theme-toggle-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-left: 0.35rem;
-}
-
-/* Toggle flotante para vistas de login / registro */
 .auth-theme-toggle-wrap {
   position: absolute;
   top: 1.25rem;
@@ -933,7 +981,6 @@
   z-index: 10;
 }
 
-/* Input con botón para alternar visibilidad de contraseña */
 .password-input-wrapper {
   position: relative;
   display: flex;
@@ -958,7 +1005,9 @@
   justify-content: center;
   padding: 0.25rem;
   border-radius: var(--radius-sm);
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .password-toggle-btn:hover {
@@ -966,4 +1015,142 @@
   transform: scale(1.1);
 }
 
+/* ==========================================================================
+   2. BREAKPOINT TABLET / PANTALLAS MEDIAS (@media (min-width: 641px))
+   ========================================================================== */
+@media (min-width: 641px) {
+  .app-shell {
+    padding: 1.25rem 1.25rem 2.5rem 1.25rem;
+    gap: 1.25rem;
+  }
 
+  .app-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.25rem;
+  }
+
+  .header-actions {
+    width: auto;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+
+  .user-profile-badge {
+    flex: 0 1 auto;
+    max-width: 260px;
+    padding: 0.35rem 0.75rem;
+  }
+
+  .user-email-text {
+    max-width: 180px;
+  }
+
+  .header-logout-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .content-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .content-header-info {
+    width: auto;
+  }
+
+  .content-header-actions {
+    width: auto;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .current-date-badge,
+  .header-action-btn {
+    width: auto;
+  }
+
+  .content-panel {
+    padding: 1.25rem;
+  }
+
+  .tasks-filter-tabs {
+    display: flex;
+    width: auto;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .filter-tab-btn {
+    width: auto;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.82rem;
+    letter-spacing: normal;
+  }
+
+  .auth-card {
+    padding: 2.25rem 2rem;
+  }
+}
+
+/* ==========================================================================
+   3. BREAKPOINT DESKTOP / PANTALLAS ANCHAS (@media (min-width: 860px))
+   ========================================================================== */
+@media (min-width: 860px) {
+  .app-shell {
+    max-width: 1100px;
+    padding: 1.75rem 1.5rem 3rem 1.5rem;
+    gap: 1.5rem;
+  }
+
+  .app-header {
+    padding: 0.85rem 1.5rem;
+  }
+
+  .app-split-layout {
+    grid-template-columns: 360px minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+
+  .sidebar-panel {
+    padding: 1.5rem;
+    gap: 1.25rem;
+  }
+
+  .mobile-form-toggle-btn {
+    display: none;
+  }
+
+  .sidebar-collapsible {
+    display: flex;
+  }
+
+  .content-panel {
+    padding: 1.5rem;
+    gap: 1.25rem;
+  }
+
+  .task-card {
+    padding: 1rem 1.25rem;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .task-main-content {
+    flex: 1 1 auto;
+  }
+
+  .task-footer-actions {
+    width: auto;
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+}
