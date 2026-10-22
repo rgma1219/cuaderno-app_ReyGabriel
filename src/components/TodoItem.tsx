@@ -171,7 +171,8 @@ export function TodoItem({
           <span className="alert-text">{errorMessage}</span>
         </div>
       )}
-      <div className="task-main-content">
+      {/* Cuerpo principal de la tarea: Checkbox, Título y Descripción con ancho completo */}
+      <div className="task-body">
         {/* Checkbox circular estilizado */}
         <button
           type="button"
@@ -183,8 +184,7 @@ export function TodoItem({
           {task.completed && <span className="checkmark-icon">✓</span>}
         </button>
 
-        {/* Información textual */}
-        <div className="task-info">
+        <div className="task-text-content">
           <h3
             className={`task-title ${task.completed ? 'task-title-completed' : ''}`}
             onClick={handleToggle}
@@ -192,13 +192,14 @@ export function TodoItem({
           >
             {task.title}
           </h3>
+
           {task.description && (
             <p className="task-desc">{task.description}</p>
           )}
         </div>
       </div>
 
-      {/* Zona de Acciones y Badge */}
+      {/* Barra inferior de estado y acciones */}
       <div className="task-footer-actions">
         <span
           className={`glass-badge ${task.completed ? 'badge-completed' : 'badge-pending'}`}
