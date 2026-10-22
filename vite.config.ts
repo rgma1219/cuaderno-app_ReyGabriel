@@ -20,7 +20,7 @@ function localApiPlugin(): Plugin {
             });
 
             req.on('end', async () => {
-              let parsedBody: unknown = {};
+              let parsedBody: unknown;
               try {
                 parsedBody = bodyStr ? JSON.parse(bodyStr) : {};
               } catch {
@@ -30,6 +30,7 @@ function localApiPlugin(): Plugin {
               let statusCode = 200;
               const mockReq = {
                 method: req.method,
+                headers: req.headers,
                 body: parsedBody,
               };
 

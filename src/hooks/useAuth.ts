@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { AuthContext, type AuthContextType } from '../features/auth/AuthContext';
+import { AuthContext, type AuthContextType } from '../features/auth/auth-context';
 
 /**
  * Custom Hook para acceder al estado y métodos de autenticación de forma segura y tipada.

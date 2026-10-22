@@ -77,7 +77,8 @@ describe('Servicio de Autenticación: formatUserSession', () => {
       tenantId: null,
       delete: async () => {},
       getIdToken: async () => 'token',
-      getIdTokenResult: async () => ({} as any),
+      getIdTokenResult: async () =>
+        ({} as unknown as import('firebase/auth').IdTokenResult),
       reload: async () => {},
       toJSON: () => ({}),
       phoneNumber: null,

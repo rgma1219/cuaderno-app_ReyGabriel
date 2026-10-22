@@ -1,25 +1,18 @@
 import {
-  createContext,
-  useContext,
   useEffect,
   useState,
   useCallback,
   type ReactNode,
 } from 'react';
+import {
+  ThemeContext,
+  type Theme,
+  type ResolvedTheme,
+} from './theme-context';
 
-export type Theme = 'light' | 'dark' | 'system';
-export type ResolvedTheme = 'light' | 'dark';
-
-export interface ThemeContextType {
-  theme: Theme;
-  resolvedTheme: ResolvedTheme;
-  setTheme: (theme: Theme) => void;
-  toggleTheme: () => void;
-}
+export type { Theme, ResolvedTheme };
 
 const THEME_STORAGE_KEY = 'cuaderno_theme';
-
-export const ThemeContext = createContext<ThemeContextType | null>(null);
 
 function getSystemTheme(): ResolvedTheme {
   if (typeof window === 'undefined' || !window.matchMedia) return 'light';
@@ -108,13 +101,3 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * Custom Hook para consumir el contexto de tema
- */
-export function useTheme(): ThemeContextType {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error('useTheme debe ser utilizado dentro de un ThemeProvider');
-  }
-  return context;
-}

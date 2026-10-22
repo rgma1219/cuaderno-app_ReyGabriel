@@ -1,4 +1,5 @@
 import type { Task } from '../types/task.types';
+import { auth } from './firebase';
 
 export interface SendSummaryRequestParams {
   recipientEmail: string;
@@ -15,11 +16,21 @@ export interface SendSummaryResponse {
 
 /**
  * Invoca el endpoint Serverless de Vercel (/api/send-summary) para despachar
- * el resumen de tareas mediante AWS SES de forma segura.
+ * el resumen de tareas mediante AWS SES de forma segura con autenticación por Token.
  */
 export async function sendTaskSummaryEmail(
   params: SendSummaryRequestParams,
 ): Promise<SendSummaryResponse> {
+  const token = await auth.currentUser?.getIdToken();
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const payload = {
     recipientEmail: params.recipientEmail.trim(),
     userDisplayName: params.userDisplayName?.trim(),
@@ -33,9 +44,7 @@ export async function sendTaskSummaryEmail(
 
   const response = await fetch('/api/send-summary', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify(payload),
   });
 
@@ -59,11 +68,18 @@ export async function requestEmailVerification(email: string): Promise<boolean> 
   if (!email || !email.includes('@')) return false;
 
   try {
+    const token = await auth.currentUser?.getIdToken();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch('/api/verify-identity', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({ email: email.trim().toLowerCase() }),
     });
 
@@ -73,3 +89,4 @@ export async function requestEmailVerification(email: string): Promise<boolean> 
     return false;
   }
 }
+

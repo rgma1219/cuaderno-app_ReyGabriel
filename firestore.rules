@@ -14,10 +14,12 @@ service cloud.firestore {
                     && request.resource.data.title is string
                     && request.resource.data.title.size() > 0;
       
-      // Modificación: sólo el propietario puede actualizar su tarea y no puede transferirla a otro UID
+      // Modificación: sólo el propietario puede actualizar su tarea, no puede transferirla a otro UID y el título no puede ser vacío
       allow update: if request.auth != null 
                     && resource.data.userId == request.auth.uid
-                    && request.resource.data.userId == request.auth.uid;
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.title is string
+                    && request.resource.data.title.size() > 0;
       
       // Eliminación: sólo el propietario puede eliminar su tarea
       allow delete: if request.auth != null && resource.data.userId == request.auth.uid;

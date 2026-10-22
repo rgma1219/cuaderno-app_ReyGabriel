@@ -1,15 +1,16 @@
 import { SESClient, VerifyEmailIdentityCommand } from '@aws-sdk/client-ses';
 
-interface VerifyIdentityPayload {
+export interface VerifyIdentityPayload {
   email: string;
 }
 
-interface ServerlessRequest {
+export interface ServerlessRequest {
   method?: string;
+  headers?: Record<string, string | string[] | undefined>;
   body?: VerifyIdentityPayload | string;
 }
 
-interface ServerlessResponse {
+export interface ServerlessResponse {
   status: (code: number) => ServerlessResponse;
   json: (data: unknown) => void;
   setHeader: (name: string, value: string) => ServerlessResponse;
@@ -18,23 +19,63 @@ interface ServerlessResponse {
 /**
  * Validador básico de formato de correo electrónico.
  */
-function isValidEmail(email: string): boolean {
+export function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 /**
- * Endpoint Serverless para registrar automáticamente una dirección de correo en AWS SES
+ * Verifica el ID Token de Firebase usando la API REST oficial de Google Identity Toolkit.
+ */
+export async function verifyFirebaseIdToken(
+  idToken: string,
+): Promise<{ uid: string; email?: string } | null> {
+  const apiKey =
+    process.env.VITE_FIREBASE_API_KEY || process.env.FIREBASE_API_KEY;
+
+  if (!apiKey) {
+    return null;
+  }
+
+  try {
+    const response = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken }),
+      },
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = (await response.json()) as {
+      users?: Array<{ localId: string; email?: string }>;
+    };
+
+    const user = data.users?.[0];
+    if (!user) return null;
+
+    return {
+      uid: user.localId,
+      email: user.email,
+    };
+  } catch (err) {
+    console.error('[Firebase Token Verification Error]:', err);
+    return null;
+  }
+}
+
+/**
+ * Endpoint Serverless para registrar una dirección de correo en AWS SES
  * y disparar el envío del correo de verificación (requerido para entornos Sandbox).
+ * Protegido para garantizar que solo usuarios autenticados puedan solicitarlo para su propia cuenta.
  */
 export default async function handler(
   req: ServerlessRequest,
   res: ServerlessResponse,
 ) {
-  // CORS Headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
   if (req.method === 'OPTIONS') {
     return res.status(200).json({ ok: true });
   }
@@ -46,6 +87,35 @@ export default async function handler(
     });
   }
 
+  // 1. Control de Acceso: Requerir y validar Token de Firebase
+  const authHeader =
+    (req.headers?.authorization as string | undefined) ||
+    (req.headers?.Authorization as string | undefined);
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({
+      success: false,
+      error: 'Acceso no autorizado. Se requiere un token de sesión válido.',
+    });
+  }
+
+  const idToken = authHeader.split('Bearer ')[1]?.trim();
+  if (!idToken) {
+    return res.status(401).json({
+      success: false,
+      error: 'Token de autenticación ausente o malformado.',
+    });
+  }
+
+  const verifiedUser = await verifyFirebaseIdToken(idToken);
+  if (!verifiedUser) {
+    return res.status(401).json({
+      success: false,
+      error: 'Sesión no válida o expirada. Por favor vuelve a iniciar sesión.',
+    });
+  }
+
+  // 2. Parsear y Validar Payload
   let payload: VerifyIdentityPayload;
   try {
     payload = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
@@ -57,15 +127,28 @@ export default async function handler(
   }
 
   const { email } = payload || {};
+  const targetEmail = verifiedUser.email || email;
 
-  if (!email || !isValidEmail(email)) {
+  if (!targetEmail || !isValidEmail(targetEmail)) {
     return res.status(400).json({
       success: false,
       error: 'El correo electrónico proporcionado no es válido o está ausente.',
     });
   }
 
-  // Configuración de credenciales y región
+  // Si el usuario intenta verificar un email ajeno a su cuenta, rechazar
+  if (
+    verifiedUser.email &&
+    email &&
+    email.trim().toLowerCase() !== verifiedUser.email.trim().toLowerCase()
+  ) {
+    return res.status(403).json({
+      success: false,
+      error: 'Solo puedes solicitar verificación para el correo de tu propia cuenta.',
+    });
+  }
+
+  // 3. Configuración de credenciales y región
   const awsRegion =
     process.env.AWS_SES_REGION ||
     (process.env.AWS_REGION && process.env.AWS_REGION !== 'us-east-1'
@@ -90,7 +173,9 @@ export default async function handler(
   });
 
   try {
-    const command = new VerifyEmailIdentityCommand({ EmailAddress: email.trim().toLowerCase() });
+    const command = new VerifyEmailIdentityCommand({
+      EmailAddress: targetEmail.trim().toLowerCase(),
+    });
     await sesClient.send(command);
 
     return res.status(200).json({
@@ -108,3 +193,4 @@ export default async function handler(
     });
   }
 }
+

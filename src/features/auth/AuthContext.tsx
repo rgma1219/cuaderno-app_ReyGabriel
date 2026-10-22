@@ -1,8 +1,8 @@
 import {
-  createContext,
   useState,
   useEffect,
   useMemo,
+  useCallback,
   type ReactNode,
 } from 'react';
 import type {
@@ -18,20 +18,9 @@ import {
   subscribeToAuthChanges,
 } from '../../services/auth.service';
 import { requestEmailVerification } from '../../services/email.service';
+import { AuthContext, type AuthContextType } from './auth-context';
 
-/**
- * Contrato de los valores y funciones expuestos por el contexto de autenticación.
- */
-export interface AuthContextType {
-  user: UserSession | null;
-  loading: boolean;
-  login: (credentials: LoginCredentials) => Promise<UserSession>;
-  register: (credentials: RegisterCredentials) => Promise<UserSession>;
-  loginWithGoogle: () => Promise<UserSession>;
-  logout: () => Promise<void>;
-}
-
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export type { AuthContextType };
 
 export interface AuthProviderProps {
   children: ReactNode;
@@ -53,34 +42,40 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
   }, []);
 
-  const login = async (credentials: LoginCredentials): Promise<UserSession> => {
-    const loggedUser = await loginWithEmail(credentials);
-    setUser(loggedUser);
-    return loggedUser;
-  };
+  const login = useCallback(
+    async (credentials: LoginCredentials): Promise<UserSession> => {
+      const loggedUser = await loginWithEmail(credentials);
+      setUser(loggedUser);
+      return loggedUser;
+    },
+    [],
+  );
 
-  const register = async (credentials: RegisterCredentials): Promise<UserSession> => {
-    const registeredUser = await registerWithEmail(credentials);
-    setUser(registeredUser);
-    if (registeredUser.email) {
-      requestEmailVerification(registeredUser.email).catch(() => {});
-    }
-    return registeredUser;
-  };
+  const register = useCallback(
+    async (credentials: RegisterCredentials): Promise<UserSession> => {
+      const registeredUser = await registerWithEmail(credentials);
+      setUser(registeredUser);
+      if (registeredUser.email) {
+        requestEmailVerification(registeredUser.email).catch(() => {});
+      }
+      return registeredUser;
+    },
+    [],
+  );
 
-  const loginWithGoogle = async (): Promise<UserSession> => {
+  const loginWithGoogle = useCallback(async (): Promise<UserSession> => {
     const googleUser = await loginWithGoogleService();
     setUser(googleUser);
     if (googleUser.email) {
       requestEmailVerification(googleUser.email).catch(() => {});
     }
     return googleUser;
-  };
+  }, []);
 
-  const logout = async (): Promise<void> => {
+  const logout = useCallback(async (): Promise<void> => {
     await logoutUser();
     setUser(null);
-  };
+  }, []);
 
   // Memoización del valor del contexto para prevenir re-renders innecesarios en consumidores
   const contextValue = useMemo<AuthContextType>(
@@ -92,7 +87,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       loginWithGoogle,
       logout,
     }),
-    [user, loading],
+    [user, loading, login, register, loginWithGoogle, logout],
   );
 
   return (
@@ -101,3 +96,4 @@ export function AuthProvider({ children }: AuthProviderProps) {
     </AuthContext.Provider>
   );
 }
+

@@ -30,10 +30,16 @@ export function TodoItem({
   const handleToggle = async () => {
     if (isBusy || isEditing) return;
     setIsBusy(true);
+    setErrorMessage(null);
     try {
       await onToggleCompleted(task.id, task.completed);
     } catch (err) {
       console.error('Error al cambiar estado de la tarea:', err);
+      setErrorMessage(
+        err instanceof Error
+          ? err.message
+          : 'Error al actualizar el estado de la tarea.',
+      );
     } finally {
       setIsBusy(false);
     }
@@ -78,10 +84,14 @@ export function TodoItem({
   // Eliminar tarea
   const handleDelete = async () => {
     setIsBusy(true);
+    setErrorMessage(null);
     try {
       await onDeleteTask(task.id);
     } catch (err) {
       console.error('Error al eliminar tarea:', err);
+      setErrorMessage(
+        err instanceof Error ? err.message : 'Error al eliminar la tarea.',
+      );
       setIsBusy(false);
       setShowConfirmDelete(false);
     }
@@ -109,6 +119,7 @@ export function TodoItem({
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
               disabled={isBusy}
+              maxLength={120}
               required
             />
           </div>
@@ -124,6 +135,7 @@ export function TodoItem({
               value={editDescription}
               onChange={(e) => setEditDescription(e.target.value)}
               disabled={isBusy}
+              maxLength={500}
             />
           </div>
 
@@ -154,6 +166,11 @@ export function TodoItem({
     <article
       className={`task-card glass-card ${task.completed ? 'task-card-completed' : ''}`}
     >
+      {errorMessage && (
+        <div className="glass-alert glass-alert-error" role="alert" style={{ marginBottom: '12px' }}>
+          <span className="alert-text">{errorMessage}</span>
+        </div>
+      )}
       <div className="task-main-content">
         {/* Checkbox circular estilizado */}
         <button

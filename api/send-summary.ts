@@ -1,4 +1,8 @@
-import { SESClient, SendEmailCommand, VerifyEmailIdentityCommand } from '@aws-sdk/client-ses';
+import {
+  SESClient,
+  SendEmailCommand,
+  VerifyEmailIdentityCommand,
+} from "@aws-sdk/client-ses";
 
 export interface EmailTaskItem {
   id?: string;
@@ -13,39 +17,102 @@ export interface SendSummaryPayload {
   tasks: EmailTaskItem[];
 }
 
-interface ServerlessRequest {
+export interface ServerlessRequest {
   method?: string;
+  headers?: Record<string, string | string[] | undefined>;
   body?: SendSummaryPayload | string;
 }
 
-interface ServerlessResponse {
+export interface ServerlessResponse {
   status: (code: number) => ServerlessResponse;
   json: (data: unknown) => void;
   setHeader: (name: string, value: string) => ServerlessResponse;
 }
 
 /**
+ * Escapa caracteres especiales de HTML para prevenir inyección de código y phishing.
+ */
+export function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/**
  * Validador básico de formato de correo electrónico.
  */
-function isValidEmail(email: string): boolean {
+export function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 /**
- * Genera la plantilla de correo en formato HTML con estética limpia y profesional.
+ * Verifica el ID Token de Firebase usando la API REST oficial de Google Identity Toolkit.
+ * No requiere la dependencia pesada firebase-admin ni claves de cuentas de servicio.
  */
-function buildHtmlTemplate(
+export async function verifyFirebaseIdToken(
+  idToken: string,
+): Promise<{ uid: string; email?: string } | null> {
+  const apiKey =
+    process.env.VITE_FIREBASE_API_KEY || process.env.FIREBASE_API_KEY;
+
+  if (!apiKey) {
+    // Si no hay API key configurada en el entorno serverless, registrar advertencia
+    console.warn(
+      "[Auth Warning] Falta VITE_FIREBASE_API_KEY para validar el token.",
+    );
+    return null;
+  }
+
+  try {
+    const response = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      },
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = (await response.json()) as {
+      users?: Array<{ localId: string; email?: string }>;
+    };
+
+    const user = data.users?.[0];
+    if (!user) return null;
+
+    return {
+      uid: user.localId,
+      email: user.email,
+    };
+  } catch (err) {
+    console.error("[Firebase Token Verification Error]:", err);
+    return null;
+  }
+}
+
+/**
+ * Genera la plantilla de correo en formato HTML con estética limpia, profesional y sanitizada.
+ */
+export function buildHtmlTemplate(
   tasks: EmailTaskItem[],
   userDisplayName: string,
 ): string {
   const total = tasks.length;
   const completed = tasks.filter((t) => t.completed).length;
   const pending = total - completed;
-  const now = new Date().toLocaleDateString('es-ES', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
+  const safeName = escapeHtml(userDisplayName);
+  const now = new Date().toLocaleDateString("es-ES", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 
   const tasksListHtml = tasks
@@ -55,17 +122,20 @@ function buildHtmlTemplate(
         : '<span style="background-color: #dbeafe; color: #1e40af; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 99px;">Pendiente</span>';
 
       const titleStyle = task.completed
-        ? 'text-decoration: line-through; color: #94a3b8;'
-        : 'color: #1e293b; font-weight: 600;';
+        ? "text-decoration: line-through; color: #94a3b8;"
+        : "color: #1e293b; font-weight: 600;";
 
-      const descHtml = task.description
-        ? `<p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">${task.description}</p>`
-        : '';
+      const safeTitle = escapeHtml(task.title);
+      const safeDesc = task.description ? escapeHtml(task.description) : "";
+
+      const descHtml = safeDesc
+        ? `<p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">${safeDesc}</p>`
+        : "";
 
       return `
         <tr style="border-bottom: 1px solid #e2e8f0;">
           <td style="padding: 12px 8px;">
-            <div style="${titleStyle} font-size: 14px;">${task.title}</div>
+            <div style="${titleStyle} font-size: 14px;">${safeTitle}</div>
             ${descHtml}
           </td>
           <td style="padding: 12px 8px; text-align: right; vertical-align: top; white-space: nowrap;">
@@ -74,7 +144,7 @@ function buildHtmlTemplate(
         </tr>
       `;
     })
-    .join('');
+    .join("");
 
   return `
     <!DOCTYPE html>
@@ -96,7 +166,7 @@ function buildHtmlTemplate(
         <!-- Contenido Principal -->
         <tr>
           <td style="padding: 28px 24px;">
-            <h2 style="margin: 0 0 8px; font-size: 18px; color: #1e293b;">Hola, ${userDisplayName}</h2>
+            <h2 style="margin: 0 0 8px; font-size: 18px; color: #1e293b;">Hola, ${safeName}</h2>
             <p style="margin: 0 0 20px; font-size: 14px; color: #64748b;">
               Aquí tienes el resumen actualizado de tus tareas registrado el <strong>${now}</strong>:
             </p>
@@ -141,7 +211,7 @@ function buildHtmlTemplate(
 /**
  * Genera la versión en texto plano como respaldo para clientes de correo sin soporte HTML.
  */
-function buildPlainTextTemplate(
+export function buildPlainTextTemplate(
   tasks: EmailTaskItem[],
   userDisplayName: string,
 ): string {
@@ -156,7 +226,7 @@ function buildPlainTextTemplate(
   text += `----------------------------------------\n`;
 
   tasks.forEach((task, index) => {
-    const status = task.completed ? '[X] COMPLETADA' : '[ ] PENDIENTE';
+    const status = task.completed ? "[X] COMPLETADA" : "[ ] PENDIENTE";
     text += `${index + 1}. ${status} - ${task.title}\n`;
     if (task.description) {
       text += `   Notas: ${task.description}\n`;
@@ -176,59 +246,126 @@ export default async function handler(
   req: ServerlessRequest,
   res: ServerlessResponse,
 ) {
-  // CORS Headers básicos
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
+  // Manejo de preflight OPTIONS
+  if (req.method === "OPTIONS") {
     return res.status(200).json({ ok: true });
   }
 
   // 1. Validar método HTTP
-  if (req.method !== 'POST') {
+  if (req.method !== "POST") {
     return res.status(405).json({
       success: false,
-      error: 'Método no permitido. Solo se aceptan peticiones POST.',
+      error: "Método no permitido. Solo se aceptan peticiones POST.",
     });
   }
 
-  // Parsear body si viene como string
+  // 2. Control de Acceso: Requerir y validar Token de Firebase
+  const authHeader =
+    (req.headers?.authorization as string | undefined) ||
+    (req.headers?.Authorization as string | undefined);
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({
+      success: false,
+      error: "Acceso no autorizado. Se requiere un token de sesión válido.",
+    });
+  }
+
+  const idToken = authHeader.split("Bearer ")[1]?.trim();
+  if (!idToken) {
+    return res.status(401).json({
+      success: false,
+      error: "Token de autenticación ausente o malformado.",
+    });
+  }
+
+  const verifiedUser = await verifyFirebaseIdToken(idToken);
+  if (!verifiedUser) {
+    return res.status(401).json({
+      success: false,
+      error: "Sesión no válida o expirada. Por favor vuelve a iniciar sesión.",
+    });
+  }
+
+  // 3. Parsear y Validar Payload
   let payload: SendSummaryPayload;
   try {
-    payload = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    payload = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
   } catch {
     return res.status(400).json({
       success: false,
-      error: 'Cuerpo de solicitud inválido (formato JSON esperado).',
+      error: "Cuerpo de solicitud inválido (formato JSON esperado).",
     });
   }
 
   const { recipientEmail, userDisplayName, tasks } = payload || {};
 
-  // 2. Validación de Payload (Exigencia de la Rúbrica)
-  if (!recipientEmail || !isValidEmail(recipientEmail)) {
+  // Forzar que el destinatario sea el email autenticado para evitar Open Relay
+  const targetEmail = verifiedUser.email || recipientEmail;
+
+  if (!targetEmail || !isValidEmail(targetEmail)) {
     return res.status(400).json({
       success: false,
-      error: 'El correo electrónico del destinatario no es válido o está ausente.',
+      error:
+        "El correo electrónico del destinatario no es válido o está ausente.",
+    });
+  }
+
+  // Si el cliente envió un email diferente al del token verificado, rechazar
+  if (
+    verifiedUser.email &&
+    recipientEmail &&
+    recipientEmail.trim().toLowerCase() !==
+      verifiedUser.email.trim().toLowerCase()
+  ) {
+    return res.status(403).json({
+      success: false,
+      error:
+        "No está permitido enviar resúmenes a un correo distinto al de la cuenta autenticada.",
     });
   }
 
   if (!Array.isArray(tasks) || tasks.length === 0) {
     return res.status(400).json({
       success: false,
-      error: 'No se encontraron tareas para generar el resumen. El listado no puede estar vacío.',
+      error:
+        "No se encontraron tareas para generar el resumen. El listado no puede estar vacío.",
     });
   }
 
-  // 3. Validación de variables de entorno de AWS
-  // Nota: Vercel Functions inyecta automáticamente AWS_REGION='us-east-1' correspondiente al datacenter iad1.
-  // Para evitar esa colisión, soportamos AWS_SES_REGION y establecemos como región predeterminada 'us-east-2' (Ohio).
+  // Control de abuso: límite de cantidad y longitud de tareas
+  if (tasks.length > 100) {
+    return res.status(400).json({
+      success: false,
+      error:
+        "El número de tareas excede el límite permitido por resumen (máximo 100 tareas).",
+    });
+  }
+
+  for (const t of tasks) {
+    if (!t || typeof t.title !== "string" || t.title.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Todas las tareas deben tener un título válido.",
+      });
+    }
+    if (
+      t.title.length > 200 ||
+      (t.description && t.description.length > 1000)
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: "Los textos de las tareas superan los límites permitidos.",
+      });
+    }
+  }
+
+  // 4. Validación de variables de entorno de AWS SES
   const awsRegion =
     process.env.AWS_SES_REGION ||
-    (process.env.AWS_REGION && process.env.AWS_REGION !== 'us-east-1'
+    (process.env.AWS_REGION && process.env.AWS_REGION !== "us-east-1"
       ? process.env.AWS_REGION
-      : 'us-east-2');
+      : "us-east-2");
   const awsAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
   const awsSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
   const senderEmail = process.env.AWS_SES_SENDER_EMAIL;
@@ -236,11 +373,12 @@ export default async function handler(
   if (!awsAccessKeyId || !awsSecretAccessKey || !senderEmail) {
     return res.status(500).json({
       success: false,
-      error: 'Las credenciales de AWS SES no están configuradas en las variables de entorno del servidor.',
+      error:
+        "Las credenciales de AWS SES no están configuradas en las variables de entorno del servidor.",
     });
   }
 
-  // 4. Inicializar cliente de AWS SES
+  // 5. Inicializar cliente de AWS SES
   const sesClient = new SESClient({
     region: awsRegion,
     credentials: {
@@ -249,29 +387,29 @@ export default async function handler(
     },
   });
 
-  const displayName = userDisplayName || recipientEmail.split('@')[0] || 'Usuario';
+  const displayName = userDisplayName || targetEmail.split("@")[0] || "Usuario";
   const htmlContent = buildHtmlTemplate(tasks, displayName);
   const plainTextContent = buildPlainTextTemplate(tasks, displayName);
 
-  // 5. Construir y enviar el comando de email a AWS SES
+  // 6. Construir y enviar el comando de email a AWS SES
   const sendEmailCommand = new SendEmailCommand({
     Source: `Cuaderno <${senderEmail}>`,
     Destination: {
-      ToAddresses: [recipientEmail],
+      ToAddresses: [targetEmail],
     },
     Message: {
       Subject: {
         Data: `Cuaderno — Resumen de Tareas (${tasks.filter((t) => !t.completed).length} pendientes)`,
-        Charset: 'UTF-8',
+        Charset: "UTF-8",
       },
       Body: {
         Html: {
           Data: htmlContent,
-          Charset: 'UTF-8',
+          Charset: "UTF-8",
         },
         Text: {
           Data: plainTextContent,
-          Charset: 'UTF-8',
+          Charset: "UTF-8",
         },
       },
     },
@@ -281,25 +419,26 @@ export default async function handler(
     const sesResponse = await sesClient.send(sendEmailCommand);
     return res.status(200).json({
       success: true,
-      message: 'Resumen enviado exitosamente a tu correo.',
+      message: "Resumen enviado exitosamente a tu correo.",
       messageId: sesResponse.MessageId,
     });
   } catch (error: unknown) {
-    console.error('[AWS SES Error]:', error);
+    console.error("[AWS SES Error]:", error);
     const err = error as { name?: string; message?: string };
     const isUnverified =
-      err?.name === 'MessageRejected' ||
-      err?.message?.includes('Email address is not verified') ||
-      err?.message?.includes('identities failed the check');
+      err?.name === "MessageRejected" ||
+      err?.message?.includes("Email address is not verified") ||
+      err?.message?.includes("identities failed the check");
 
     if (isUnverified) {
-      // Disparamos preventivamente el correo de verificación de AWS SES
       try {
         await sesClient.send(
-          new VerifyEmailIdentityCommand({ EmailAddress: recipientEmail.trim().toLowerCase() }),
+          new VerifyEmailIdentityCommand({
+            EmailAddress: targetEmail.trim().toLowerCase(),
+          }),
         );
       } catch (verifyErr) {
-        console.warn('[AWS SES Auto-Verify Warning]:', verifyErr);
+        console.warn("[AWS SES Auto-Verify Warning]:", verifyErr);
       }
 
       return res.status(400).json({
@@ -310,7 +449,9 @@ export default async function handler(
     }
 
     const errorMessage =
-      error instanceof Error ? error.message : 'Error desconocido al despachar el correo.';
+      error instanceof Error
+        ? error.message
+        : "Error desconocido al despachar el correo.";
 
     return res.status(500).json({
       success: false,

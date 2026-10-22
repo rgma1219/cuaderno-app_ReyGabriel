@@ -29,23 +29,20 @@ export interface UseTasksReturn {
  */
 export function useTasks(): UseTasksReturn {
   const { user } = useAuth();
+  const userId = user?.uid;
+
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   // Suscripción reactiva en tiempo real cuando hay un usuario autenticado
   useEffect(() => {
-    if (!user?.uid) {
-      setTasks([]);
-      setLoading(false);
+    if (!userId) {
       return;
     }
 
-    setLoading(true);
-    setError(null);
-
     const unsubscribe = subscribeUserTasks(
-      user.uid,
+      userId,
       (updatedTasks) => {
         setTasks(updatedTasks);
         setLoading(false);
@@ -60,17 +57,20 @@ export function useTasks(): UseTasksReturn {
     return () => {
       unsubscribe();
     };
-  }, [user?.uid]);
+  }, [userId]);
+
+  const activeTasks = useMemo(() => (userId ? tasks : []), [userId, tasks]);
+  const activeLoading = userId ? loading : false;
 
   // Operaciones CRUD memoizadas para prevenir re-renders en componentes hijos
   const addTask = useCallback(
     async (input: TaskCreateInput): Promise<string> => {
-      if (!user?.uid) {
+      if (!userId) {
         throw new Error('Debes estar autenticado para crear una tarea.');
       }
-      return await createTaskService(user.uid, input);
+      return await createTaskService(userId, input);
     },
-    [user?.uid],
+    [userId],
   );
 
   const editTask = useCallback(
@@ -95,16 +95,16 @@ export function useTasks(): UseTasksReturn {
   );
 
   // Métricas calculadas para la interfaz
-  const totalCount = tasks.length;
+  const totalCount = activeTasks.length;
   const completedCount = useMemo(
-    () => tasks.filter((t) => t.completed).length,
-    [tasks],
+    () => activeTasks.filter((t) => t.completed).length,
+    [activeTasks],
   );
   const pendingCount = totalCount - completedCount;
 
   return {
-    tasks,
-    loading,
+    tasks: activeTasks,
+    loading: activeLoading,
     error,
     totalCount,
     pendingCount,

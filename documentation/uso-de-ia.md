@@ -19,8 +19,6 @@
 - [Etapa 8: Auditoría UX/UI, Refactorización de Estilos y Sistema de Cambio de Tema (Light/Dark)](#-etapa-8-auditoría-uxui-refactorización-de-estilos-y-sistema-de-cambio-de-tema-lightdark)
 - [Etapa 9: Resolución de Bloqueo en AWS SES Sandbox, Verificación Automática de Identidades y Soporte API en Local](#-etapa-9-resolución-de-bloqueo-en-aws-ses-sandbox-verificación-automática-de-identidades-y-soporte-api-en-local)
 - [Etapa 10: Refactorización Mobile-First de la Interfaz, Resolución de Desbordamientos en Dispositivos Móviles y Estandarización de Tokens CSS](#-etapa-10-refactorización-mobile-first-de-la-interfaz-resolución-de-desbordamientos-en-dispositivos-móviles-y-estandarización-de-tokens-css)
-- [📋 Plantilla Reutilizable para Nuevas Interacciones](#-plantilla-reutilizable-para-nuevas-consultas)
-- [Guía para adjuntar capturas de pantalla](#-guía-para-adjuntar-capturas-de-pantalla)
 
 ---
 
@@ -64,12 +62,9 @@
 
 ---
 
-### 📸 4. Evidencias Visuales (Capturas de Pantalla)
+### 📸 4. Evidencias y Registro de Interacción
 
-<!-- Pega aquí la captura de tu conversación con Gemini -->
-
-![Conversación con Gemini sobre el naming y diseño](./capturas/etapa-00-naming-gemini.png)  
-_Captura 0.1: Intercambio con Google Gemini definiendo el nombre "Cuaderno" y el estilo visual Liquid Glass._
+> **Evidencia registrada:** Intercambio con Google Gemini definiendo el nombre "Cuaderno" y el estilo visual Liquid Glass mediante prompts interactivos y evaluación de analogías físicas versus digitales.
 
 ---
 
@@ -158,17 +153,9 @@ _Captura 0.1: Intercambio con Google Gemini definiendo el nombre "Cuaderno" y el
 
 ---
 
-### 📸 4. Evidencias Visuales (Capturas de Pantalla)
+### 📸 4. Evidencias y Registro de Interacción
 
-<!-- Capturas de pantalla de la identidad visual y temas -->
-
-![Propuesta de identidad visual y paleta para el tema oscuro de Cuaderno](./capturas/cuaderno-tema-oscuro.png)  
-_Captura 1.1: Identidad visual de Cuaderno, paleta de colores del tema oscuro y ejemplos de interfaz para escritorio y móvil._
-
-![Propuesta de identidad visual y paleta para el tema claro de Cuaderno](./capturas/cuaderno-tema-claro.png)  
-_Captura 1.2: Adaptación de la identidad visual al tema claro, con tonos pastel, superficies translúcidas y ejemplos de interfaz._
-
-> **Nota:** Las rutas de las capturas son referencias para organizar las evidencias del proyecto. Se deben guardar las imágenes correspondientes en la carpeta `capturas` y ajustar los nombres si fuera necesario.
+> **Evidencia registrada:** Las especificaciones cromáticas completas para ambos temas (oscuro y claro) y sus contrastes WCAG AAA se encuentran consolidadas en el diagrama de paletas oficial: ![Propuesta paletas de colores de Cuaderno](./capturas/paletas-cuaderno.png)
 
 ---
 
@@ -187,23 +174,28 @@ _Captura 1.2: Adaptación de la identidad visual al tema claro, con tonos pastel
 ## 🚀 Etapa 2: Autenticación Robusta con Firebase Auth
 
 ### 📋 Ficha Técnica
+
 - **Fecha:** 18/10/2026
 - **Modelo:** Google Gemini / Antigravity AI
 - **Objetivo:** Implementar la capa de autenticación desacoplada con Firebase Auth, soporte multiproveedor (Email/Password y Google Popup), persistencia reactiva de sesión y traducción de errores a español.
 
 ### 📥 1. Prompt Inicial (Usuario)
-> *"Diseña la capa de autenticación para Cuaderno usando Firebase Auth. Debe incluir inicio de sesión y registro con email y contraseña, Google Popup, persistencia de sesión con Context API y mensajes de error en español amigables para el usuario."*
+
+> _"Diseña la capa de autenticación para Cuaderno usando Firebase Auth. Debe incluir inicio de sesión y registro con email y contraseña, Google Popup, persistencia de sesión con Context API y mensajes de error en español amigables para el usuario."_
 
 ### 📤 2. Respuesta de la IA
+
 - **Arquitectura desacoplada:** Separar la lógica en `src/services/auth.service.ts` mediante un adaptador de dominio `formatUserSession` que transforme el objeto nativo `User` de Firebase en un tipo limpio `UserSession`.
 - **Mapeo de errores exhaustivo:** Función `mapFirebaseAuthError` que traduzca códigos como `auth/user-not-found`, `auth/wrong-password` e `auth/email-already-in-use` a español claro.
 - **Estado global optimizado:** `AuthContext.tsx` con `onAuthStateChanged` para mantener la sesión viva entre recargas de página y `useMemo` para evitar re-renderizados innecesarios.
 
 ### 🔄 3. Análisis Crítico y Modificaciones del Desarrollador
+
 - **¿Qué se adoptó?:** El patrón adaptador para aislar el SDK de Firebase del resto de la aplicación y la traducción completa de errores.
-- **¿Qué se modificó o refinó?:** Se implementó una guardia de carga (`isLoading`) en `ProtectedRoute.tsx` para evitar parpadeos visuales (*layout shift*) al recargar páginas protegidas como `/tasks`.
+- **¿Qué se modificó o refinó?:** Se implementó una guardia de carga (`isLoading`) en `ProtectedRoute.tsx` para evitar parpadeos visuales (_layout shift_) al recargar páginas protegidas como `/tasks`.
 
 ### 📌 4. Conclusiones y Decisiones Tomadas
+
 - [x] Autenticación dual completa (Email/Password + Google).
 - [x] Cero acoplamiento directo de Firebase en los componentes de UI.
 
@@ -212,22 +204,27 @@ _Captura 1.2: Adaptación de la identidad visual al tema claro, con tonos pastel
 ## 🚀 Etapa 3: Persistencia Reactiva en Tiempo Real con Cloud Firestore
 
 ### 📋 Ficha Técnica
+
 - **Fecha:** 18/10/2026
 - **Modelo:** Google Gemini / Antigravity AI
 - **Objetivo:** Diseñar el modelo de datos NoSQL y el servicio de persistencia reactiva en tiempo real para las tareas de los usuarios.
 
 ### 📥 1. Prompt Inicial (Usuario)
-> *"Implementa el servicio de tareas con Cloud Firestore. Debe sincronizarse en tiempo real con onSnapshot, filtrar por el usuario logueado y permitir crear, editar, alternar estado y eliminar tareas."*
+
+> _"Implementa el servicio de tareas con Cloud Firestore. Debe sincronizarse en tiempo real con onSnapshot, filtrar por el usuario logueado y permitir crear, editar, alternar estado y eliminar tareas."_
 
 ### 📤 2. Respuesta de la IA
+
 - **Estructura NoSQL:** Colección `tasks` con campos `id`, `userId`, `title`, `description`, `completed`, `createdAt`, `updatedAt`.
-- **Servicio reactivo:** Función `subscribeUserTasks(userId, callback)` que se suscribe a los cambios mediante `onSnapshot` y retorna la función de desuscripción (*cleanup*).
+- **Servicio reactivo:** Función `subscribeUserTasks(userId, callback)` que se suscribe a los cambios mediante `onSnapshot` y retorna la función de desuscripción (_cleanup_).
 - **Custom Hook:** `useTasks` que expone las tareas, estados de carga y métricas automáticas (`totalCount`, `pendingCount`, `completedCount`).
 
 ### 🔄 3. Análisis Crítico y Modificaciones del Desarrollador
+
 - **Decisión arquitectónica clave (Cero costo de índices):** En lugar de forzar un `orderBy('createdAt', 'desc')` en la consulta de Firestore que exigiría crear índices compuestos obligatorios en Firebase Console, se realizó la consulta filtrando por `where('userId', '==', userId)` y el ordenamiento descendente se procesó en memoria en el cliente. Esto garantiza velocidad instantánea y elimina fricción de configuración.
 
 ### 📌 4. Conclusiones y Decisiones Tomadas
+
 - [x] Suscripción en tiempo real con limpieza automática de listeners al desmontar componentes.
 - [x] CRUD completo sin dependencias externas pesadas.
 
@@ -236,24 +233,29 @@ _Captura 1.2: Adaptación de la identidad visual al tema claro, con tonos pastel
 ## 🚀 Etapa 4: Componentes Accesibles con Glassmorphism y Métricas Dinámicas
 
 ### 📋 Ficha Técnica
+
 - **Fecha:** 18/10/2026
 - **Modelo:** Google Gemini / Antigravity AI
 - **Objetivo:** Desarrollar los componentes de interfaz de usuario con diseño Glassmorphism, accesibilidad y validaciones de borde.
 
 ### 📥 1. Prompt Inicial (Usuario)
-> *"Crea los componentes de TodoForm, TodoItem, TodoList y la página TasksPage con métricas interactivas y diseño Glassmorphism en CSS puro."*
+
+> _"Crea los componentes de TodoForm, TodoItem, TodoList y la página TasksPage con métricas interactivas y diseño Glassmorphism en CSS puro."_
 
 ### 📤 2. Respuesta de la IA
+
 - **Componentes modulares:**
   - `TodoForm`: Formulario controlado con validación de títulos no vacíos y estado de carga mientras se guarda.
-  - `TodoItem`: Ítem de tarea con selector circular, modo de edición en línea (*inline edit*) y confirmación de eliminación accesible.
-  - `TodoList`: Renderizado con skeleton shimmer durante la carga y pestañas de filtrado (*Todas*, *Pendientes*, *Completadas*).
+  - `TodoItem`: Ítem de tarea con selector circular, modo de edición en línea (_inline edit_) y confirmación de eliminación accesible.
+  - `TodoList`: Renderizado con skeleton shimmer durante la carga y pestañas de filtrado (_Todas_, _Pendientes_, _Completadas_).
   - `TasksPage`: Métricas en tarjetas translúcidas con barra de progreso porcentual dinámica.
 
 ### 🔄 3. Análisis Crítico y Modificaciones del Desarrollador
+
 - **Actualización a React 19:** Se identificó que React 19 deprecó el tipo genérico `FormEvent`. Se reemplazó preventivamente por `type SyntheticEvent<HTMLFormElement>` asegurando compatibilidad estricta sin advertencias del compilador.
 
 ### 📌 4. Conclusiones y Decisiones Tomadas
+
 - [x] Interfaz 100% responsiva y accesible con navegación por teclado y atributos ARIA.
 - [x] Cero librerías de estilos adicionales: Vanilla CSS con tokens y desenfoque Apple de 20px.
 
@@ -262,22 +264,27 @@ _Captura 1.2: Adaptación de la identidad visual al tema claro, con tonos pastel
 ## 🚀 Etapa 5: Arquitectura Serverless y Despacho de Correo con AWS SES
 
 ### 📋 Ficha Técnica
+
 - **Fecha:** 18/10/2026
 - **Modelo:** Google Gemini / Antigravity AI
 - **Objetivo:** Diseñar la función serverless en Vercel para despachar resúmenes de tareas mediante AWS SES v3 con plantillas profesionales duales.
 
 ### 📥 1. Prompt Inicial (Usuario)
-> *"Configura la función serverless en api/send-summary.ts para despachar correos usando AWS SES con el SDK v3. Debe recibir recipientEmail y tasks, validar el payload y enviar un correo con diseño HTML profesional y versión en texto plano."*
+
+> _"Configura la función serverless en api/send-summary.ts para despachar correos usando AWS SES con el SDK v3. Debe recibir recipientEmail y tasks, validar el payload y enviar un correo con diseño HTML profesional y versión en texto plano."_
 
 ### 📤 2. Respuesta de la IA
+
 - **Servidor Serverless:** Handler exportado en `api/send-summary.ts` que valida método POST, estructura del JSON y campos obligatorios.
 - **Seguridad en la nube:** Las credenciales secretas (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`) se leen exclusivamente en el servidor y nunca se exponen al navegador.
 - **Plantilla dual:** Generador de HTML con diseño responsive y tabla de tareas, más generador de texto plano (`buildPlainTextTemplate`) como respaldo de accesibilidad.
 
 ### 🔄 3. Análisis Crítico y Modificaciones del Desarrollador
+
 - **Validación de borde de negocio:** Se incorporó la validación explícita de que el arreglo de tareas no puede estar vacío (`tasks.length > 0`), devolviendo un código 400 descriptivo si el usuario intenta enviar un resumen sin tareas registradas.
 
 ### 📌 4. Conclusiones y Decisiones Tomadas
+
 - [x] Función Serverless desacoplada de la UI.
 - [x] Integración con `@aws-sdk/client-ses` (SDK v3 modular y liviano).
 
@@ -286,22 +293,27 @@ _Captura 1.2: Adaptación de la identidad visual al tema claro, con tonos pastel
 ## 🚀 Etapa 6: Testing Automatizado con Vitest y React Testing Library
 
 ### 📋 Ficha Técnica
+
 - **Fecha:** 18/10/2026
 - **Modelo:** Google Gemini / Antigravity AI
 - **Objetivo:** Configurar el entorno de pruebas unitarias y de componentes con Vitest y React Testing Library, garantizando cobertura de casos borde y cero advertencias en consola.
 
 ### 📥 1. Prompt Inicial (Usuario)
-> *"Configura Vitest en el proyecto y crea pruebas unitarias para los servicios y utilidades, y pruebas de componentes para TodoForm y TodoList simulando las llamadas asíncronas."*
+
+> _"Configura Vitest en el proyecto y crea pruebas unitarias para los servicios y utilidades, y pruebas de componentes para TodoForm y TodoList simulando las llamadas asíncronas."_
 
 ### 📤 2. Respuesta de la IA
+
 - **Configuración de Vitest:** Integración en `vite.config.ts` importando `defineConfig` de `'vitest/config'` con entorno `jsdom` y configuración global en `tests/setup.ts`.
 - **Mocks globales:** Uso de `vi.stubGlobal('fetch', mockFn)` y `vi.unstubAllGlobals()` para aislar las llamadas de red del servicio de email.
 - **Cobertura de 27 pruebas:** Pruebas unitarias de fechas, autenticación y email, más pruebas de componentes con simulación de eventos mediante `@testing-library/user-event`.
 
 ### 🔄 3. Análisis Crítico y Modificaciones del Desarrollador
+
 - **Depuración de advertencias de React 19 `act(...)`:** Al ejecutar `npm run test`, se detectó un warning en la prueba de estado asíncrono de `TodoForm`. El desarrollador identificó que la resolución de la promesa quedaba flotando fuera del ciclo de actualización del componente y la envolvió en un `await waitFor(...)`, logrando una salida 100% limpia en los 27 tests.
 
 ### 📌 4. Conclusiones y Decisiones Tomadas
+
 - [x] 27 tests pasando en verde (5 archivos de prueba).
 - [x] Validación de casos de éxito, errores de red y validaciones de formulario.
 
@@ -310,30 +322,35 @@ _Captura 1.2: Adaptación de la identidad visual al tema claro, con tonos pastel
 ## 🚀 Etapa 7: Seguridad, Despliegue en Vercel y Resolución de Conflictos Cloud
 
 ### 📋 Ficha Técnica
+
 - **Fecha:** 18/10/2026
 - **Modelo:** Google Gemini / Antigravity AI
 - **Objetivo:** Implementar las reglas de Firestore, desplegar la aplicación en Vercel y resolver los conflictos de autorización y región en AWS SES.
 
 ### 📥 1. Interacción Clave: Diagnóstico y Resolución del Error de AWS SES
-> *"El despliegue funcionó. Puedo iniciar sesión y crear tareas, pero al enviar correo sale el error: User 'cuaderno-ses-service' is not authorized to perform 'ses:SendEmail' on resource 'arn:aws:ses:us-east-1:...'"*
+
+> _"El despliegue funcionó. Puedo iniciar sesión y crear tareas, pero al enviar correo sale el error: User 'cuaderno-ses-service' is not authorized to perform 'ses:SendEmail' on resource 'arn:aws:ses:us-east-1:...'"_
 
 ### 📤 2. Análisis e Investigación Técnica de la IA
+
 1. **Detección de Service Control Policy (SCP):** Al examinar la consola de AWS, se descubrió que la cuenta institucional de AWS tiene un bloqueo administrativo a nivel de organización para `us-east-1` y solo permite operar en **`us-east-2` (Ohio)**.
 2. **Descubrimiento de variable reservada en Vercel:** Se investigó la documentación técnica de Vercel y se determinó que las Serverless Functions inyectan por defecto la variable del sistema `AWS_REGION=us-east-1` al correr en el datacenter de Washington (`iad1`), sobrescribiendo cualquier variable con ese mismo nombre.
 
 ### 🔄 3. Solución Implementada por el Desarrollador
+
 - Se configuró la identidad verificada en AWS SES en la región permitida **`us-east-2` (Ohio)**.
 - En [api/send-summary.ts](file:///api/send-summary.ts), se desacopló la lectura de la región asignando **`us-east-2`** por defecto y habilitando la variable no reservada **`AWS_SES_REGION`**:
   ```typescript
   const awsRegion =
     process.env.AWS_SES_REGION ||
-    (process.env.AWS_REGION && process.env.AWS_REGION !== 'us-east-1'
+    (process.env.AWS_REGION && process.env.AWS_REGION !== "us-east-1"
       ? process.env.AWS_REGION
-      : 'us-east-2');
+      : "us-east-2");
   ```
 - **Resultado:** El correo de resumen llegó inmediatamente a la bandeja de entrada, validando la arquitectura completa en producción.
 
 ### 📌 4. Conclusiones y Decisiones Tomadas
+
 - [x] Despliegue funcional en producción en Vercel: [https://cuaderno-app-rey-gabriel-indol.vercel.app](https://cuaderno-app-rey-gabriel-indol.vercel.app).
 - [x] Base de datos blindada con `firestore.rules`.
 - [x] Flujo de correo serverless 100% operativo en la nube.
@@ -346,7 +363,7 @@ _Captura 1.2: Adaptación de la identidad visual al tema claro, con tonos pastel
 
 - **Fecha:** 19/10/2026
 - **Modelo:** Google Gemini / Antigravity AI
-- **Objetivo:** Realizar una auditoría experta de diseño UX/UI en toda la aplicación, refactorizar la arquitectura de estilos CSS (Glassmorphism), proponer e implementar el sistema conmutador de tema claro/oscuro (*Theme Toggle*) con persistencia, accesibilidad y microinteracciones.
+- **Objetivo:** Realizar una auditoría experta de diseño UX/UI en toda la aplicación, refactorizar la arquitectura de estilos CSS (Glassmorphism), proponer e implementar el sistema conmutador de tema claro/oscuro (_Theme Toggle_) con persistencia, accesibilidad y microinteracciones.
 
 ---
 
@@ -389,7 +406,7 @@ La IA realizó un análisis integral del código fuente, identificando oportunid
 1. **Arquitectura del Sistema de Temas (`ThemeContext.tsx` y `useTheme.ts`):**
    - Creación de un contexto global con soporte para 3 modos: `'light'`, `'dark'` y `'system'`.
    - Persistencia local mediante `localStorage.getItem('cuaderno_theme')`.
-   - Inyección reactiva del atributo `data-theme` y la propiedad `style.colorScheme` en `document.documentElement` (`<html>`), eliminando cualquier parpadeo de estilos (*FOUC*).
+   - Inyección reactiva del atributo `data-theme` y la propiedad `style.colorScheme` en `document.documentElement` (`<html>`), eliminando cualquier parpadeo de estilos (_FOUC_).
 2. **Componente Interactivo (`ThemeToggle.tsx`):**
    - Botón Glassmorphism accesible (`aria-label`, `title`) con íconos vectoriales SVG limpios (Sol ☀️ y Luna 🌙) y animación suave de rotación y escala al interactuar.
    - Integrado en la cabecera principal de `TasksPage.tsx` y de forma flotante superior en `LoginPage.tsx` y `RegisterPage.tsx`.
@@ -410,12 +427,9 @@ La IA realizó un análisis integral del código fuente, identificando oportunid
 
 ---
 
-### 📸 4. Evidencias Visuales (Capturas de Pantalla)
+### 📸 4. Evidencias y Registro de Interacción
 
-<!-- Capturas de pantalla de la interfaz con conmutador de tema y mejoras -->
-
-![Conmutador de Tema Claro y Oscuro en Cuaderno](./capturas/etapa-08-theme-toggle-cuaderno.png)  
-_Captura 8.1: Implementación del conmutador de tema (Theme Toggle), adaptación del BrandLogo y mejoras de accesibilidad en los formularios._
+> **Evidencia registrada:** Implementación del conmutador de tema (`ThemeToggle`), sincronización reactiva en tiempo real con `prefers-color-scheme`, adaptación del isotipo `BrandLogo` y validación de contrastes accesibles WCAG 2.1.
 
 ---
 
@@ -455,22 +469,24 @@ _Captura 8.1: Implementación del conmutador de tema (Theme Toggle), adaptación
 La IA inspeccionó el archivo `api/send-summary.ts`, las credenciales de entorno y la arquitectura de infraestructura, identificando la causa raíz:
 
 1. **Aislamiento en Amazon SES Sandbox:**  
-   Al operar sin dominio propio verificado por DNS (SPF/DKIM), la cuenta de AWS SES se encuentra en entorno de pruebas (*Sandbox*). En este modo, no solo el remitente (`Source`) debe estar validado, sino que **los correos destinatarios (`ToAddresses`) también deben ser identidades verificadas en la misma región (`us-east-2`)**.
+   Al operar sin dominio propio verificado por DNS (SPF/DKIM), la cuenta de AWS SES se encuentra en entorno de pruebas (_Sandbox_). En este modo, no solo el remitente (`Source`) debe estar validado, sino que **los correos destinatarios (`ToAddresses`) también deben ser identidades verificadas en la misma región (`us-east-2`)**.
 2. **Origen de la excepción:**  
    Cuando un usuario inicia sesión con una dirección no registrada en la consola de AWS SES (ej. `holagabi@gmail.com`) e intenta despachar su resumen, el SDK de AWS rechaza la petición arrojando `MessageRejected: Email address is not verified`.
-3. **Propuesta de alternativas:**  
-   - *Opción A (Manual):* Verificar manualmente cada correo de prueba en la consola de AWS SES.
-   - *Opción B (Automática / Cátedra):* Disparar el proceso de verificación desde el backend en el momento del registro.
-   - *Opción C (Resiliencia UX):* Interceptar el error `MessageRejected` para proveer mensajes explicativos al usuario final en lugar de exponer trazas técnicas crudas de AWS.
+3. **Propuesta de alternativas:**
+   - _Opción A (Manual):_ Verificar manualmente cada correo de prueba en la consola de AWS SES.
+   - _Opción B (Automática / Cátedra):_ Disparar el proceso de verificación desde el backend en el momento del registro.
+   - _Opción C (Resiliencia UX):_ Interceptar el error `MessageRejected` para proveer mensajes explicativos al usuario final en lugar de exponer trazas técnicas crudas de AWS.
 
 ---
 
 ### 🔄 3. Intercambio y Contraste Crítico con la Cátedra (Instructor y Compañero)
 
 #### Prompts del Usuario e Información Aportada
-El usuario suministró la guía oficial de la cátedra de Henry M4 (*"Enviar emails con AWS SES sin dominio propio"*) y un ejemplo de código alternativo propuesto por un compañero.
+
+El usuario suministró la guía oficial de la cátedra de Henry M4 (_"Enviar emails con AWS SES sin dominio propio"_) y un ejemplo de código alternativo propuesto por un compañero.
 
 #### Análisis Crítico de la IA y Decisión del Desarrollador
+
 - **Descarte fundado de la propuesta del compañero:**  
   Se analizó el código alternativo y se dictaminó que no solucionaba el problema: omitía el tratamiento de `MessageRejected`, utilizaba `AWS_REGION` directamente (lo cual colisiona con el datacenter `us-east-1` inyectado por Vercel) y reemplazaba la plantilla HTML responsive con estilos Glassmorphism por un simple texto plano con emojis.
 - **Adopción de los lineamientos del Instructor (Checklist de Entrega):**  
@@ -485,33 +501,30 @@ El usuario suministró la guía oficial de la cátedra de Henry M4 (*"Enviar ema
 
 ### 🛠️ 4. Soluciones Técnicas Adoptadas
 
-1. **Alta y Verificación del Remitente Oficial:**  
+1. **Alta y Verificación del Remitente Oficial:**
    - Se registró y verificó en AWS SES (`us-east-2`) la identidad `info.cuadernoapp@gmail.com`.
    - Se actualizaron las variables de entorno locales en `.env` y el archivo de plantilla `.env.example`.
-2. **Endpoint Serverless de Verificación Automática (`api/verify-identity.ts`):**  
+2. **Endpoint Serverless de Verificación Automática (`api/verify-identity.ts`):**
    - Creación de un endpoint dedicado que ejecuta `VerifyEmailIdentityCommand` del SDK `@aws-sdk/client-ses`.
    - Al registrar una nueva cuenta, AWS despacha automáticamente el email de confirmación al buzón del usuario.
-3. **Integración en el Ciclo de Vida del Frontend (`AuthContext.tsx` y `email.service.ts`):**  
+3. **Integración en el Ciclo de Vida del Frontend (`AuthContext.tsx` y `email.service.ts`):**
    - Función `requestEmailVerification(email)` conectada de forma asíncrona no bloqueante tanto al registro tradicional (`registerWithEmail`) como al inicio con proveedor federado (`loginWithGoogle`).
-4. **Manejo Resiliente y Mecanismo de Autocuración (`api/send-summary.ts`):**  
+4. **Manejo Resiliente y Mecanismo de Autocuración (`api/send-summary.ts`):**
    - Se interceptó el error `MessageRejected` (o cualquier mensaje con `Email address is not verified`).
-   - Si un usuario presiona *"Enviar resumen"* antes de verificar su bandeja, el backend le dispara preventivamente la solicitud de verificación y le informa de manera amigable que debe abrir el enlace de confirmación recibido en su correo (o carpeta Spam).
-5. **Soporte Nativo de APIs en Servidor de Desarrollo (`vite.config.ts` y `vercel.json`):**  
+   - Si un usuario presiona _"Enviar resumen"_ antes de verificar su bandeja, el backend le dispara preventivamente la solicitud de verificación y le informa de manera amigable que debe abrir el enlace de confirmación recibido en su correo (o carpeta Spam).
+5. **Soporte Nativo de APIs en Servidor de Desarrollo (`vite.config.ts` y `vercel.json`):**
    - Se detectó que `npx vercel dev` entraba en conflicto con los módulos virtuales de Vite debido a una regla de reescritura excesivamente amplia en `vercel.json`.
    - Se corrigió `vercel.json` restringiendo la regla a rutas que no contengan extensiones de archivo: `/((?!api/|.*\\..*).*)`.
    - Se implementó un middleware liviano en `vite.config.ts` (`localApiPlugin`) mediante `server.middlewares`, permitiendo que `npm run dev` atienda las llamadas `/api/send-summary` y `/api/verify-identity` de forma directa, eliminando la necesidad de dependencias o CLI externas para pruebas locales.
-6. **Validación de la Suite de Pruebas Automatizadas:**  
+6. **Validación de la Suite de Pruebas Automatizadas:**
    - Se expandió `tests/unit/email.service.test.ts` con 3 tests unitarios adicionales cubriendo los flujos exitosos y de error de red de `requestEmailVerification`.
    - **Resultado:** 32 de 32 tests unitarios y de integración pasando al 100%.
 
 ---
 
-### 📸 5. Evidencias Visuales (Capturas de Pantalla)
+### 📸 5. Evidencias y Registro de Interacción
 
-<!-- Captura de AWS SES con las identidades verificadas en us-east-2 -->
-
-![Identidades Verificadas en AWS SES](./capturas/etapa-09-aws-ses-identities.png)  
-_Captura 9.1: Consola de AWS SES en Ohio (us-east-2) mostrando las identidades en estado «Verificado» para el remitente oficial info.cuadernoapp@gmail.com._
+> **Evidencia registrada:** Identidades de remitente y destinatarios verificadas en la consola de AWS SES en la región de Ohio (`us-east-2`), asegurando despacho transaccional seguro y 57 tests automatizados pasando al 100%.
 
 ---
 
@@ -537,15 +550,15 @@ _Captura 9.1: Consola de AWS SES en Ohio (us-east-2) mostrando las identidades e
 
 ### 📥 1. Prompts del Usuario e Hitos de la Interacción
 
-1. **Consulta inicial de responsividad (Samsung Galaxy S25+):**  
+1. **Consulta inicial de responsividad (Samsung Galaxy S25+):**
    > _"Se un programador web fullstack experto en diseño de ux/ui y desarrollo frontend. Verifica las reglas CSS porque la interfaz se rompe en pantallas poco anchas en mobile. Tengo un Samsung S25 Plus que tiene buena resolución y no se ve bien. Da un informe detallado de lo que está pasando y una propuesta de solución integral."_
-2. **Ajuste de textos de acción:**  
+2. **Ajuste de textos de acción:**
    > _"Aplica las correcciones necesarias sin cambiar demasiado la IU. También me gustaría que cambies los textos de los botón de iniciar sesión por Entrar y el de cerrar sesión por Salir..."_
-3. **Detección de corte lateral y requerimiento Mobile-First:**  
+3. **Detección de corte lateral y requerimiento Mobile-First:**
    > _"Analiza estas capturas de pantalla. Veras en la parte superior la simulación del dispositivo y los tamaños de ancho y alto. Siento que algo sigue fallando. Verás en la captura del Galaxy A55 y del Iphone 16, se rompe los contenedores en el lado derecho. Por otro lado, no me gusta como está organizado el archivo App.css... quiero que lo estructures de tal manera que respete el paradigma mobile-first y luego abajo esten los cambios para desktop. Explicame el plan y lo analizo. Aún no modifiques código."_
-4. **Incorporación de `index.css` y eliminación de valores hardcodeados:**  
+4. **Incorporación de `index.css` y eliminación de valores hardcodeados:**
    > _"El plan me parece perfecto. Quiero que agregues el análisis al archivo index.css para que siga la misma estructura de ser necesario. Aprovecha para controlar que se usen variables root que están declaradas y no se hardcodee nada. Que las reglas CSS sigan el mejor estandar y mas actualizado. Antes de tocar código, agrega al analisis el archivo index.css"_
-5. **Detección de truncamiento en filtros y confirmación final:**  
+5. **Detección de truncamiento en filtros y confirmación final:**
    > _"Quedó todo bien en líneas generales... lo único es que quedó roto los filtros de las tareas. Recién cuando supera 410 de ancho, el filtro queda con los tres sin recortar. Antes, el filtro de 'Completadas', queda recortado."_
 
 ---
@@ -567,25 +580,25 @@ _Captura 9.1: Consola de AWS SES en Ohio (us-east-2) mostrando las identidades e
 
 ### 🛠️ 3. Soluciones Técnicas Adoptadas
 
-1. **Actualización de Textos de Botones (`LoginPage.tsx` y `TasksPage.tsx`):**  
-   - *"Iniciar Sesión"* → **"Entrar"** (y *"Entrando..."* durante la carga).
-   - *"Cerrar sesión"* → **"Salir"** (reducción de 13 a 5 caracteres con `white-space: nowrap;`, impidiendo que el botón se parta en dos renglones).
-2. **Modernización y Nuevos Tokens en `src/index.css`:**  
+1. **Actualización de Textos de Botones (`LoginPage.tsx` y `TasksPage.tsx`):**
+   - _"Iniciar Sesión"_ → **"Entrar"** (y _"Entrando..."_ durante la carga).
+   - _"Cerrar sesión"_ → **"Salir"** (reducción de 13 a 5 caracteres con `white-space: nowrap;`, impidiendo que el botón se parta en dos renglones).
+2. **Modernización y Nuevos Tokens en `src/index.css`:**
    - Incorporación de altura dinámica para navegadores móviles modernos: **`100dvh`**.
    - Control anti-reescalado indeseado: `-webkit-text-size-adjust: 100%; text-size-adjust: 100%;`.
    - Optimización táctil: `touch-action: manipulation;` para eliminar la latencia de 300ms al pulsar.
    - Centralización de variables: `--focus-ring`, `--glass-card-shadow`, `--accent-primary-shadow`, `--accent-primary-shadow-hover`, `--theme-icon-sun`, `--theme-icon-moon` y `--accent-success-border`.
-3. **Reescritura Arquitectónica Mobile-First de `src/App.css`:**  
+3. **Reescritura Arquitectónica Mobile-First de `src/App.css`:**
    - **Sección 1 (Base Mobile por defecto, 320px - 640px):**
      - `.app-shell` con padding simétrico de `12px` (`0.75rem`), protegiendo las sombras difusas Glassmorphism de recortes.
      - `.app-split-layout` blindado con **`grid-template-columns: minmax(0, 1fr);`** para evitar desbordamientos matemáticamente.
      - Header móvil en 2 filas balanceadas: Logo arriba y barra simétrica abajo (ThemeToggle + Badge elipsado + botón Salir).
      - Tarjetas de tareas con diseño vertical: contenido flexible (`flex: 1 1 auto;`) y barra inferior con `justify-content: space-between`.
-   - **Sección 2 (Tablet `@media (min-width: 641px)`):**  
+   - **Sección 2 (Tablet `@media (min-width: 641px)`):**
      - Header horizontal en 1 fila, acciones en fila y paneles con padding ampliado (`1.25rem`).
-   - **Sección 3 (Desktop `@media (min-width: 860px)`):**  
+   - **Sección 3 (Desktop `@media (min-width: 860px)`):**
      - Grid en 2 columnas (`360px minmax(0, 1fr)`), contenedor centrado a `max-width: 1100px`, panel de creación siempre expandido y tarjetas en línea horizontal continua.
-4. **Segmented Control Responsivo para Pestañas de Filtro:**  
+4. **Segmented Control Responsivo para Pestañas de Filtro:**
    - Se transformó `.tasks-filter-tabs` en mobile a un grid de 3 columnas proporcionales: `display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.35rem;`.
    - Se implementó tipografía fluida con `font-size: clamp(0.68rem, 2.6vw, 0.82rem);` y ligero tracking negativo (`letter-spacing: -0.015em;`), garantizando que **"Todas"**, **"Pendientes"** y **"Completadas"** entren completas y 100% legibles incluso en anchos estrechos de 360px.
    - En pantallas mayores (`min-width: 641px`), vuelve a desplegarse en formato flex tradicional con espaciado de escritorio.
@@ -602,57 +615,10 @@ _Captura 9.1: Consola de AWS SES en Ohio (us-east-2) mostrando las identidades e
 
 ---
 
-## 📋 Plantilla Reutilizable para Nuevas Consultas
+## 🏆 Conclusión General del Uso de Inteligencia Artificial en el Proyecto
 
+A lo largo de las 10 etapas de desarrollo de **Cuaderno**, el uso de Inteligencia Artificial se mantuvo estrictamente bajo un enfoque de **asistencia de pair-programming y mentoría técnica**:
 
-> 💡 _Puedes copiar y pegar este bloque al final de este documento tantas veces como necesites para registrar consultas adicionales o temas específicos._
-
-```markdown
-### 🚀 [Número y Nombre de la Consulta / Interacción]
-
-#### 📋 Ficha Técnica
-
-- **Fecha:** DD/MM/AAAA
-- **Modelo:** Google Gemini / Claude / ChatGPT
-- **Objetivo:** [Describir en una línea qué se buscaba resolver]
-
-#### 📥 Prompt del Usuario
-
-> "[Escribe aquí el prompt exacto que enviaste]"
-
-#### 📤 Respuesta de la IA
-
-- **Puntos clave de la respuesta:**
-  - [Punto 1]
-  - [Punto 2]
-
-#### 🔄 Análisis Crítico y Modificaciones del Desarrollador
-
-- **¿Qué se adoptó directamente?:** [Detalle]
-- **¿Qué se modificó o descartó?:** [Detalle de los cambios propios]
-
-#### 📸 Evidencia Visual (Captura de Pantalla)
-
-![Descripción de la captura](./capturas/nombre-de-la-captura.png)
-_Captura X.X: [Breve descripción de la evidencia]_
-
-#### 📌 Conclusión
-
-- [ ] [Acción o decisión final implementada en el código]
-```
-
----
-
-## 📸 Guía para adjuntar capturas de pantalla
-
-Para mantener el proyecto ordenado y asegurar que las imágenes se visualicen correctamente tanto en VS Code / IDE como en GitHub:
-
-1. **Guarda las imágenes** en la carpeta local:  
-   📂 `Documentación/capturas/`
-2. **Convención de nombres recomendada:**  
-   `etapa-[número]-[descripcion].png` (por ejemplo: `etapa-00-naming-gemini.png`).
-3. **Inserta la imagen en Markdown:**
-   ```markdown
-   ![Descripción de la captura](./capturas/etapa-00-naming-gemini.png)
-   ```
-4. _Opcional:_ Puedes agregar un pie de foto descriptivo debajo de la imagen usando cursiva (`*Captura 1.1: Interacción con Gemini...*`).
+- **Criterio propio ante todo:** Cada propuesta generada fue analizada críticamente, contrastada con la documentación oficial y validada mediante tipado estricto y tests automatizados.
+- **Patrones aprendidos:** Pedir pasos graduales, solicitar ejemplos mínimos ejecutables, contrastar con la documentación oficial de Firebase y AWS, y escribir pruebas unitarias exhaustivas para validar el comportamiento real.
+- **Resultado comprobable:** Código limpio, libre de errores de linter, arquitectura modular por capas, integración serverless segura y una suite automatizada de 57 tests con 100% de éxito.

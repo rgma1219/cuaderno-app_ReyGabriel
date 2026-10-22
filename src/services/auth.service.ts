@@ -73,7 +73,7 @@ export async function registerWithEmail(
     );
     return formatUserSession(userCredential.user);
   } catch (error) {
-    throw new Error(mapFirebaseAuthError(error));
+    throw new Error(mapFirebaseAuthError(error), { cause: error });
   }
 }
 
@@ -91,7 +91,7 @@ export async function loginWithEmail(
     );
     return formatUserSession(userCredential.user);
   } catch (error) {
-    throw new Error(mapFirebaseAuthError(error));
+    throw new Error(mapFirebaseAuthError(error), { cause: error });
   }
 }
 
@@ -103,7 +103,7 @@ export async function loginWithGoogle(): Promise<UserSession> {
     const userCredential = await signInWithPopup(auth, googleProvider);
     return formatUserSession(userCredential.user);
   } catch (error) {
-    throw new Error(mapFirebaseAuthError(error));
+    throw new Error(mapFirebaseAuthError(error), { cause: error });
   }
 }
 
@@ -114,7 +114,7 @@ export async function logoutUser(): Promise<void> {
   try {
     await signOut(auth);
   } catch (error) {
-    throw new Error(mapFirebaseAuthError(error));
+    throw new Error(mapFirebaseAuthError(error), { cause: error });
   }
 }
 

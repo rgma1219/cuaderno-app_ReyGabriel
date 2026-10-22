@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { ThemeContext } from "../features/theme/ThemeContext";
+import { ThemeContext } from "../features/theme/theme-context";
 import logoLight from "../assets/logo-light.png";
 import logoDark from "../assets/logo-dark.png";
 
