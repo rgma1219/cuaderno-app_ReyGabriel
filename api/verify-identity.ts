@@ -17,10 +17,15 @@ export interface ServerlessResponse {
 }
 
 /**
- * Validador básico de formato de correo electrónico.
+ * Validador estricto de formato y longitud de correo electrónico (RFC 5322).
  */
 export function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!email || typeof email !== "string") return false;
+  const trimmed = email.trim();
+  if (trimmed.length === 0 || trimmed.length > 254) return false;
+  const emailRegex =
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+  return emailRegex.test(trimmed);
 }
 
 /**

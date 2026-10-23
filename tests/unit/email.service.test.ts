@@ -129,6 +129,7 @@ describe('Servicio de Email: sendTaskSummaryEmail (Casos Borde y Serverless)', (
     });
 
     it('debe capturar errores de red sin propagar excepción y retornar false', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
       const mockFetch = vi.fn().mockRejectedValue(new Error('Network Failure'));
       vi.stubGlobal('fetch', mockFetch);
 

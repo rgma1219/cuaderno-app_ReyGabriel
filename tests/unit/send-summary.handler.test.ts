@@ -73,6 +73,9 @@ describe('Backend Serverless: /api/send-summary (Funciones y Handler)', () => {
       expect(isValidEmail('invalido-sin-arroba')).toBe(false);
       expect(isValidEmail('@dominio.com')).toBe(false);
       expect(isValidEmail('usuario@')).toBe(false);
+      expect(isValidEmail('usuario@dominio-sin-tld')).toBe(false);
+      expect(isValidEmail('')).toBe(false);
+      expect(isValidEmail('a'.repeat(250) + '@dominio.com')).toBe(false);
     });
   });
 
@@ -201,6 +204,67 @@ describe('Backend Serverless: /api/send-summary (Funciones y Handler)', () => {
         expect.objectContaining({
           success: false,
           error: expect.stringContaining('distinto al de la cuenta autenticada'),
+        }),
+      );
+    });
+
+    it('debe responder 400 si userDisplayName excede los 100 caracteres', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          users: [{ localId: 'user_123', email: 'propietario@example.com' }],
+        }),
+      } as Response);
+
+      const req: ServerlessRequest = {
+        method: 'POST',
+        headers: { authorization: 'Bearer valid_token_123' },
+        body: {
+          recipientEmail: 'propietario@example.com',
+          userDisplayName: 'A'.repeat(101),
+          tasks: [{ title: 'Tarea', completed: false }],
+        },
+      };
+      const res = createMockResponse();
+
+      await handler(req, res);
+
+      expect(res.statusCode).toBe(400);
+      expect(res.responseData).toEqual(
+        expect.objectContaining({
+          success: false,
+          error: expect.stringContaining('longitud máxima permitida (100 caracteres)'),
+        }),
+      );
+    });
+
+    it('debe responder 400 si el campo completed de una tarea no es booleano estricto', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          users: [{ localId: 'user_123', email: 'propietario@example.com' }],
+        }),
+      } as Response);
+
+      const req: ServerlessRequest = {
+        method: 'POST',
+        headers: { authorization: 'Bearer valid_token_123' },
+        body: {
+          recipientEmail: 'propietario@example.com',
+          tasks: [
+            { title: 'Tarea con completed inválido', completed: 'true' as unknown as boolean },
+          ],
+        },
+      };
+      const res = createMockResponse();
+
+      await handler(req, res);
+
+      expect(res.statusCode).toBe(400);
+      expect(res.responseData).toEqual(
+        expect.objectContaining({
+          success: false,
+          error: expect.stringContaining('debe ser un valor booleano estricto'),
         }),
       );
     });

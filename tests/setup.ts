@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
+import { afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 // Variables de entorno de respaldo para pruebas aisladas sin .env
 if (!process.env.VITE_FIREBASE_API_KEY) {
@@ -38,6 +38,19 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   })),
+});
+
+/**
+ * Silenciar console.error y console.warn esperados durante la suite de pruebas
+ * para mantener una salida de consola limpia y enfocada en los resultados de los tests.
+ */
+beforeAll(() => {
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
+});
+
+afterAll(() => {
+  vi.restoreAllMocks();
 });
 
 /**

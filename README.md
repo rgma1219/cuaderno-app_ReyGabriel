@@ -5,7 +5,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0_Strict-3178c6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Firebase](https://img.shields.io/badge/Firebase-Auth_%26_Firestore-ffca28?style=for-the-badge&logo=firebase)](https://firebase.google.com/)
 [![AWS SES](https://img.shields.io/badge/AWS-SES_v3-ff9900?style=for-the-badge&logo=amazon-aws)](https://aws.amazon.com/ses/)
-[![Vitest](https://img.shields.io/badge/Vitest-5.0_Passing_57/57-729b1a?style=for-the-badge&logo=vitest)](https://vitest.dev/)
+[![Vitest](https://img.shields.io/badge/Vitest-5.0_Passing_59/59-729b1a?style=for-the-badge&logo=vitest)](https://vitest.dev/)
 
 > **Proyecto Integrador M4 — Henry Bootcamp**  
 > **Cliente / Caso de Uso:** MateCode Startup  
@@ -17,6 +17,20 @@
 ## 🌟 Descripción Ejecutiva
 
 **Cuaderno** es una Single Page Application (SPA) para la gestión estratégica de tareas diarias desarrollada para los colaboradores de la startup MateCode. Diseñada con un enfoque riguroso _mobile-first_ y una estética contemporánea de **Liquid Glass (Glassmorphism)**, la plataforma permite a los usuarios registrarse e iniciar sesión de forma segura, administrar tareas con sincronización en tiempo real, filtrar por estados y despachar resúmenes ejecutivos directamente a su correo electrónico a través de una arquitectura serverless en la nube desacoplada y protegida.
+
+---
+
+## 🎬 Demostración y Funcionamiento en Producción
+
+> **Recorrido visual interactivo:** Demostración del ciclo completo de la aplicación: autenticación con Firebase, sincronización en tiempo real con Cloud Firestore, alternancia de temas Claro/Oscuro y despacho del resumen vía AWS SES.
+
+![Demostración en Producción de Cuaderno](./documentation/capturas/demo-app.gif)
+
+### ✨ Flujo Operativo y Experiencia de Usuario:
+1. **Autenticación y Persistencia:** Inicio de sesión instantáneo (Email/Password o Google Popup), protección reactiva de rutas privadas (`ProtectedRoute`) y restauración fluida de sesión con `onAuthStateChanged`.
+2. **Gestión Reactiva en Tiempo Real:** Creación instantánea de tareas, marcado de completitud con animación suave, edición en línea con tecla `Enter` / `Esc` y eliminación con confirmación modal.
+3. **Filtros Dinámicos con Segmented Control:** Clasificación instantánea entre *Todas*, *Pendientes* y *Completadas* con contadores en vivo actualizados automáticamente.
+4. **Despacho Transaccional de Resúmenes:** Generación de resúmenes consolidados y envío directo al buzón del usuario mediante un clic en *"Enviar resumen"*.
 
 ---
 
@@ -49,8 +63,8 @@
    - Cero dependencias CSS innecesarias: 100% Vanilla CSS responsivo y accesible.
 
 5. **Suite Completa de Pruebas Automatizadas**:
-   - 57 pruebas unitarias, de integración y serverless ejecutadas con **Vitest** y **React Testing Library**.
-   - Cobertura completa de casos borde (inputs vacíos, espacios en blanco, respuestas serverless 500, fallos de red, tokens inválidos y estados de carga asíncronos).
+   - 59 pruebas unitarias, de integración y serverless ejecutadas con **Vitest** y **React Testing Library**.
+   - Cobertura completa de casos borde (inputs vacíos, espacios en blanco, respuestas serverless 500, fallos de red, tokens inválidos, sanitización XSS y estados de carga asíncronos).
 
 ---
 
@@ -102,21 +116,32 @@ El envío de resúmenes de tareas está desacoplado del frontend para resguardar
     │  (3) POST /api/send-summary con header "Authorization: Bearer <ID_TOKEN>"
     ▼
 [ Vercel Function: /api/send-summary.ts ]
-    │  (4) Valida el Token contra Google Identity Toolkit REST
-    │  (5) Verifica que recipientEmail coincida con el email del usuario autenticado
-    │  (6) Sanitiza caracteres HTML (<, >, &, ", ') para prevenir inyección y phishing
-    │  (7) Valida límites de tareas (máximo 100) y longitud de textos
+    │  (4) Valida el Token contra Google Identity Toolkit REST (previene relay no autenticado)
+    │  (5) Valida destinatario: formato estricto RFC 5322, longitud <= 254 y coincidencia de UID
+    │  (6) Valida userDisplayName (<= 100 caracteres) y estructura estricta de tasks (booleano en completed)
+    │  (7) Sanitiza caracteres HTML (<, >, &, ", ') contra ataques de inyección y phishing
+    │  (8) Control de abuso: máximo 100 tareas por lote y límites de longitud en título y notas
     ▼
 [ AWS SES Client (SDK v3 - Región us-east-2) ]
-    │  (8) Despacha SendEmailCommand con plantilla HTML y Texto Plano
+    │  (9) Despacha SendEmailCommand con plantilla HTML y Texto Plano
     │      * Si la identidad está pendiente en Sandbox: dispara VerifyEmailIdentityCommand
     ▼
 [ Bandeja de Entrada del Usuario ]
-    │  (9) Recibe el correo formateado con métricas y estado de tareas
+    │  (10) Recibe el correo formateado con métricas y estado de tareas
     ▼
 [ Frontend Feedback ]
-       (10) Muestra Toast de éxito o advertencia para confirmar buzón
+       (11) Muestra Toast de éxito o advertencia para confirmar buzón
 ```
+
+### 📬 Evidencia de Envío Real en Producción (AWS SES)
+
+> **Verificación de entrega en buzón:** Captura del correo transaccional recibido en producción mediante el servicio **AWS Simple Email Service (SES)** configurado en `us-east-2` (Ohio).
+
+![Evidencia de Correo Recibido en Producción](./documentation/capturas/email-resumen-ses.png)
+
+- **Remitente Verificado:** Identidad autorizada bajo el encabezado oficial de Cuaderno.
+- **Asunto Dinámico:** Contabilización precisa de tareas pendientes (`Cuaderno — Resumen de Tareas (X pendientes)`).
+- **Diseño de Correo Responsive:** Plantilla HTML adaptada para clientes móviles y de escritorio, con tarjetas de métricas, estilos tachados para completadas y versión en texto plano para máxima compatibilidad.
 
 ---
 
@@ -227,7 +252,7 @@ AWS_SES_SENDER_EMAIL=correo@correo.com
 
 ## 🧪 Pruebas Automatizadas
 
-La aplicación cuenta con **57 tests automatizados** desarrollados con **Vitest** y **React Testing Library**, estructurados con mocks completos para correr de forma 100% aislada:
+La aplicación cuenta con **59 tests automatizados** desarrollados con **Vitest** y **React Testing Library**, estructurados con mocks completos para correr de forma 100% aislada:
 
 ```bash
 # Ejecutar la suite completa de pruebas
@@ -237,13 +262,35 @@ npm run test
 npm run test:watch
 ```
 
+### 📸 Evidencia de Ejecución Exitosa (Consola Vitest)
+
+> **Garantía de calidad e integridad:** Ejecución al 100% en verde de todas las suites unitarias, de integración UI y serverless.
+
+![Evidencia de Ejecución Exitosa de Tests](./documentation/capturas/tests-ejecucion-exitosa.png)
+
+```text
+✓ tests/unit/task.service.test.ts (7 tests)
+✓ tests/unit/date.utils.test.ts (2 tests)
+✓ tests/unit/send-summary.handler.test.ts (11 tests)
+✓ tests/components/ProtectedRoute.test.tsx (3 tests)
+✓ tests/unit/email.service.test.ts (6 tests)
+✓ tests/unit/auth.service.test.ts (10 tests)
+✓ tests/components/ThemeToggle.test.tsx (2 tests)
+✓ tests/components/TodoList.test.tsx (7 tests)
+✓ tests/components/TodoForm.test.tsx (5 tests)
+✓ tests/components/TodoItem.test.tsx (6 tests)
+
+Test Files  10 passed (10)
+     Tests  59 passed (59)
+```
+
 ### Detalle de Suites de Pruebas:
 
 - `tests/unit/date.utils.test.ts`: Formateo de fechas y manejo de timestamps inválidos (2 tests).
 - `tests/unit/auth.service.test.ts`: Mapeo exhaustivo de errores de Firebase en español y desacople de sesión (10 tests).
 - `tests/unit/task.service.test.ts`: Operaciones CRUD con Firestore mockeado y ordenamiento cronológico (7 tests).
 - `tests/unit/email.service.test.ts`: Cliente de email, token Bearer y control de errores de red (6 tests).
-- `tests/unit/send-summary.handler.test.ts`: Handler serverless de Vercel, validación de token 401, rechazo de correo ajeno 403, saneamiento HTML y despacho SES 200 (9 tests).
+- `tests/unit/send-summary.handler.test.ts`: Handler serverless de Vercel, validación de token 401, rechazo de correo ajeno 403, saneamiento HTML contra XSS, validaciones estrictas de email (RFC 5322), tipos booleanos en tareas y despacho SES 200 (11 tests).
 - `tests/components/ProtectedRoute.test.tsx`: Redirección sin sesión, pantalla de loading y renderizado seguro (3 tests).
 - `tests/components/TodoForm.test.tsx`: Validaciones de formulario, espacios en blanco y bloqueo en loading (5 tests).
 - `tests/components/TodoList.test.tsx`: Skeletons, filtrado por pestañas y estados vacíos (7 tests).

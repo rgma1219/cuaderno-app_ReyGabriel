@@ -42,10 +42,15 @@ export function escapeHtml(text: string): string {
 }
 
 /**
- * Validador básico de formato de correo electrónico.
+ * Validador estricto de formato y longitud de correo electrónico (RFC 5322).
  */
 export function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!email || typeof email !== "string") return false;
+  const trimmed = email.trim();
+  if (trimmed.length === 0 || trimmed.length > 254) return false;
+  const emailRegex =
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+  return emailRegex.test(trimmed);
 }
 
 /**
@@ -325,6 +330,21 @@ export default async function handler(
     });
   }
 
+  // Validación estricta de userDisplayName (tipo y longitud)
+  if (userDisplayName !== undefined && typeof userDisplayName !== "string") {
+    return res.status(400).json({
+      success: false,
+      error: "El nombre del usuario debe ser una cadena de texto válida.",
+    });
+  }
+  if (typeof userDisplayName === "string" && userDisplayName.length > 100) {
+    return res.status(400).json({
+      success: false,
+      error:
+        "El nombre de usuario excede la longitud máxima permitida (100 caracteres).",
+    });
+  }
+
   if (!Array.isArray(tasks) || tasks.length === 0) {
     return res.status(400).json({
       success: false,
@@ -333,7 +353,7 @@ export default async function handler(
     });
   }
 
-  // Control de abuso: límite de cantidad y longitud de tareas
+  // Control de abuso: límite de cantidad de tareas
   if (tasks.length > 100) {
     return res.status(400).json({
       success: false,
@@ -342,20 +362,45 @@ export default async function handler(
     });
   }
 
+  // Validación exhaustiva de cada tarea procesada
   for (const t of tasks) {
-    if (!t || typeof t.title !== "string" || t.title.trim().length === 0) {
+    if (!t || typeof t !== "object" || Array.isArray(t)) {
+      return res.status(400).json({
+        success: false,
+        error:
+          "Cada elemento del listado de tareas debe ser un objeto válido.",
+      });
+    }
+    if (typeof t.title !== "string" || t.title.trim().length === 0) {
       return res.status(400).json({
         success: false,
         error: "Todas las tareas deben tener un título válido.",
       });
     }
-    if (
-      t.title.length > 200 ||
-      (t.description && t.description.length > 1000)
-    ) {
+    if (t.title.length > 200) {
       return res.status(400).json({
         success: false,
-        error: "Los textos de las tareas superan los límites permitidos.",
+        error: "El título de la tarea supera el límite permitido de 200 caracteres.",
+      });
+    }
+    if (typeof t.completed !== "boolean") {
+      return res.status(400).json({
+        success: false,
+        error:
+          "El estado de completitud de cada tarea debe ser un valor booleano estricto.",
+      });
+    }
+    if (t.description !== undefined && typeof t.description !== "string") {
+      return res.status(400).json({
+        success: false,
+        error: "La descripción de la tarea debe ser una cadena de texto.",
+      });
+    }
+    if (t.description && t.description.length > 1000) {
+      return res.status(400).json({
+        success: false,
+        error:
+          "La descripción de la tarea supera el límite permitido de 1000 caracteres.",
       });
     }
   }
